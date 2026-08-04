@@ -1,0 +1,167 @@
+import '../models/rider_model.dart';
+
+const lagosLat = 6.5244;
+const lagosLng = 3.3792;
+
+final mockRidersNearby = <RiderModel>[
+  RiderModel(
+    id: '1',
+    name: 'Philip Aderogba',
+    completedDeliveries: 13,
+    rating: 3.8,
+    distanceKm: 4,
+    vehicleInfo: 'Toyota Altis',
+    plateNumber: 'FL 029 RF',
+    lat: 6.5355,
+    lng: 3.3489,
+    ratingBreakdown: const {3: 80, 2: 20, 1: 0},
+    reviews: const [
+      RiderReview(
+        reviewerName: 'Wanda Maximoff',
+        comment: 'He is so efficient',
+        date: '09/11/2025',
+      ),
+      RiderReview(
+        reviewerName: 'Stephen Strange',
+        comment: 'He was on time',
+        date: '09/10/2025',
+      ),
+      RiderReview(
+        reviewerName: 'Stephen Strange',
+        comment: 'Reliable delivery',
+        date: '09/10/2025',
+      ),
+    ],
+  ),
+  RiderModel(
+    id: '2',
+    name: 'John Benson',
+    completedDeliveries: 24,
+    rating: 3.5,
+    distanceKm: 6,
+    vehicleInfo: 'Honda Civic',
+    plateNumber: 'LG 442 AA',
+    lat: 6.5180,
+    lng: 3.3670,
+    ratingBreakdown: const {3: 75, 2: 25, 1: 0},
+    reviews: const [
+      RiderReview(
+        reviewerName: 'Peter Parker',
+        comment: 'Very fast delivery',
+        date: '09/08/2025',
+      ),
+    ],
+  ),
+  RiderModel(
+    id: '3',
+    name: 'Peter Madueke',
+    completedDeliveries: 19,
+    rating: 4.0,
+    distanceKm: 12,
+    vehicleInfo: 'Toyota Corolla',
+    plateNumber: 'LG 110 BX',
+    lat: 6.5600,
+    lng: 3.3400,
+    ratingBreakdown: const {3: 100, 2: 0, 1: 0},
+    reviews: const [
+      RiderReview(
+        reviewerName: 'Tony Stark',
+        comment: 'Excellent service',
+        date: '09/05/2025',
+      ),
+    ],
+  ),
+  RiderModel(
+    id: '4',
+    name: 'Morris Doe',
+    completedDeliveries: 13,
+    rating: 3.5,
+    distanceKm: 4,
+    vehicleInfo: 'Toyota Altis',
+    plateNumber: 'FL 029 RF',
+    lat: 6.5100,
+    lng: 3.3900,
+    ratingBreakdown: const {3: 100, 2: 0, 1: 0},
+    reviews: const [
+      RiderReview(
+        reviewerName: 'Wanda Maximoff',
+        comment: 'He is so efficient',
+        date: '09/11/2025',
+      ),
+      RiderReview(
+        reviewerName: 'Stephen Strange',
+        comment: 'He was on time',
+        date: '09/10/2025',
+      ),
+      RiderReview(
+        reviewerName: 'Stephen Strange',
+        comment: 'Reliable delivery',
+        date: '09/10/2025',
+      ),
+    ],
+  ),
+  RiderModel(
+    id: '5',
+    name: 'Jack Jacobs',
+    completedDeliveries: 13,
+    rating: 3.5,
+    distanceKm: 4,
+    vehicleInfo: 'Kia Rio',
+    plateNumber: 'LG 220 CX',
+    lat: 6.5244,
+    lng: 3.3650,
+    ratingBreakdown: const {3: 75, 2: 25, 1: 0},
+    reviews: const [],
+  ),
+  RiderModel(
+    id: '6',
+    name: 'Chris Elvis',
+    completedDeliveries: 13,
+    rating: 3.5,
+    distanceKm: 4,
+    vehicleInfo: 'Hyundai Accent',
+    plateNumber: 'LG 330 DY',
+    lat: 6.5400,
+    lng: 3.3950,
+    ratingBreakdown: const {3: 75, 2: 25, 1: 0},
+    reviews: const [],
+  ),
+  RiderModel(
+    id: '7',
+    name: 'Lucky Dumebi',
+    completedDeliveries: 13,
+    rating: 3.5,
+    distanceKm: 4,
+    vehicleInfo: 'Toyota Yaris',
+    plateNumber: 'LG 441 EZ',
+    lat: 6.5050,
+    lng: 3.3550,
+    ratingBreakdown: const {3: 75, 2: 25, 1: 0},
+    reviews: const [],
+  ),
+  RiderModel(
+    id: '8',
+    name: 'Biyi Samuel',
+    completedDeliveries: 28,
+    rating: 4.0,
+    distanceKm: 2,
+    vehicleInfo: 'Toyota Altis',
+    plateNumber: 'FL 112 SS',
+    lat: 6.5300,
+    lng: 3.3800,
+    ratingBreakdown: const {3: 100, 2: 0, 1: 0},
+    reviews: const [
+      RiderReview(
+        reviewerName: 'Agatha Arkness',
+        comment: 'Best rider I have used',
+        date: '09/12/2025',
+      ),
+    ],
+  ),
+];
+
+final mockRecentLocations = [
+  ('Herbert Macaulay Way', 'Yaba, Lagos State', '10km away'),
+  ('National Stadium Lagos', 'Surulere, Lagos State', '2km away'),
+  ('Ikorodu Road', 'Lagos, Lagos State', '7.6km away'),
+];

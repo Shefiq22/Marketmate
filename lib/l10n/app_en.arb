@@ -1,0 +1,426 @@
+{
+  "@@locale": "en",
+
+  "appbar_settings": "Settings",
+  "menu_dark_mode": "Dark Mode",
+  "menu_security": "Security",
+  "menu_language": "Language",
+  "menu_notifications": "Notifications",
+  "menu_privacy_policy": "Privacy policy",
+  "menu_terms_of_service": "Terms of service",
+  "translate_to": "Translate to {lang}",
+  "@translate_to": {
+    "description": "Button label to translate text to a given language",
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "translate_show_original": "Show original",
+  "translate_retry": "Translation failed. Tap to retry.",
+  "menu_reset_password": "Reset Password",
+  "menu_fingerprint": "Fingerprint",
+  "section_preferences": "Preferences",
+  "section_general": "General",
+  "section_support": "Support",
+  "language_screen_title": "Language",
+  "language_en": "English",
+  "language_ha": "Hausa",
+  "language_ig": "Igbo",
+  "language_yo": "Yoruba",
+  "language_pcm": "Nigerian Pidgin",
+
+  "nav_home": "Home",
+  "nav_products": "Products",
+  "nav_cart": "Cart",
+  "nav_orders": "Orders",
+  "nav_profile": "Profile",
+  "nav_riders": "Riders",
+  "nav_deliveries": "Deliveries",
+  "nav_wallet": "Wallet",
+
+  "category_all": "All",
+  "category_vegetables": "Vegetables",
+  "category_foodstuff": "Foodstuff",
+  "category_fruits": "Fruits",
+  "category_meat": "Meat",
+  "category_fish": "Fish",
+
+  "retry": "Retry",
+  "see_all": "See All",
+  "loading_ellipsis": "Loading...",
+  "failed_to_load": "Failed to load",
+
+  "home_greeting": "Welcome {name},",
+  "@home_greeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "home_search_hint": "Search stores, vegetables, fruits etc.",
+  "home_featured_stores": "Featured Stores",
+  "home_categories": "Categories",
+  "home_available_sellers": "Available Sellers",
+  "home_no_sellers_found": "No sellers found",
+  "home_search_empty_hint": "Try searching for something else",
+  "home_error_loading": "Could not load products.\nPull down to retry.",
+  "home_open_now": "Open Now",
+  "home_closed": "Closed",
+  "home_free": "Free",
+  "home_free_delivery": "Free delivery",
+
+  "products_search_hint": "Search vegetables, fruits etc.",
+  "products_categories": "Categories",
+  "products_browse": "Browse products",
+  "products_no_products": "No products",
+  "products_no_products_category": "No products found in this category",
+  "products_add": "Add",
+  "products_sold_out_badge": "Sold out",
+
+  "orders_title": "Orders",
+  "orders_history": "Order history",
+  "orders_active": "Active",
+  "orders_pending": "Pending",
+  "orders_completed": "Completed",
+  "orders_no_active": "No active orders",
+  "orders_no_active_desc": "Active orders will appear here.",
+  "orders_no_pending": "No pending orders",
+  "orders_no_pending_desc": "Pending orders will appear here.",
+  "orders_no_completed": "No completed orders",
+  "orders_no_completed_desc": "Completed orders will appear here.",
+  "orders_no_history": "No order history",
+  "orders_no_history_desc": "Past orders will appear here.",
+  "orders_status_active": "Active",
+  "orders_status_awaiting": "Awaiting",
+  "orders_status_completed": "Completed",
+
+  "cart_title": "Cart",
+  "cart_empty": "Your cart is empty",
+  "cart_empty_desc": "Browse products and add items to your cart",
+  "cart_available": "Available for checkout",
+  "cart_sold_out_section": "Sold out",
+  "cart_total": "Total",
+  "cart_checkout": "Proceed to Checkout",
+
+  "dialog_sign_out_title": "Are you sure you want to sign out?",
+  "dialog_yes": "Yes",
+  "dialog_back_to_home": "Back to Home",
+  "dialog_cancel": "Cancel",
+  "dialog_clear_cart_title": "Clear cart?",
+  "dialog_clear_cart_body": "Are you sure you want to remove all items?",
+  "dialog_clear": "Clear",
+
+  "menu_profile_label": "Profile",
+  "menu_address_book": "Address book",
+  "menu_messages": "Messages",
+  "menu_alert_preferences": "Alert preferences",
+  "menu_help_support": "Help & Support",
+  "menu_settings_label": "Settings",
+  "menu_sign_out": "Sign out",
+  "menu_dark_mode_label": "Dark mode",
+  "menu_earnings": "Earnings",
+  "menu_bank_payouts": "Bank & Payouts",
+  "menu_wallet_label": "Wallet",
+
+  "product_no_reviews": "No reviews yet",
+  "product_be_first_review": "Be the first to leave a review",
+
+  "review_hint": "Share your honest experience",
+  "review_submit": "Submit Review",
+  "review_view_orders": "View Orders",
+  "review_back_homepage": "Back to Homepage",
+
+  "receipt_view": "View Receipt",
+  "receipt_date": "Date:",
+  "receipt_time": "Time:",
+  "receipt_to": "To:",
+  "receipt_for": "For:",
+  "receipt_delivery": "Delivery",
+  "receipt_subtotal": "Sub Total",
+  "receipt_rate_items": "Rate Items",
+
+  "checkout_bank_transfer": "Bank transfer",
+  "checkout_bank_transfer_desc": "Transfer to the seller's account",
+  "checkout_saved_card": "Saved card",
+  "checkout_paystack": "Paystack",
+  "checkout_delivery_fee": "Delivery fee",
+  "checkout_commission": "Commission (0.05%)",
+  "checkout_total_label": "Total",
+  "checkout_add_address": "Add new address",
+  "checkout_add_address_hint": "Please add a delivery address",
+
+  "order_detail_delivery": "Delivery",
+  "order_detail_subtotal": "Sub Total",
+  "order_detail_delivery_address": "Delivery address",
+  "order_detail_payment_method": "Payment method",
+  "order_detail_message_seller": "Message Seller",
+  "order_detail_ordered": "Ordered",
+  "order_detail_confirmed": "Confirmed",
+  "order_detail_shipped": "Shipped",
+  "order_detail_delivered": "Delivered",
+
+  "profile_updated_success": "Profile updated successfully",
+  "profile_update": "Update",
+  "profile_no_session": "No session found. Please log in again.",
+  "profile_refreshed": "Profile refreshed",
+  "profile_refresh_error": "Could not refresh profile data.",
+
+  "address_no_saved": "No saved addresses",
+  "address_deleted": "Address deleted",
+  "address_added": "Address added!",
+  "address_saved": "Address saved!",
+  "address_hint_home": "Home",
+  "address_hint_type": "Type here",
+  "address_hint_enter": "Enter here",
+  "address_saving": "Saving...",
+  "address_add": "Add address",
+  "address_save": "Save address",
+
+  "seller_home_greeting": "Welcome {name},",
+  "@seller_home_greeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "seller_home_search_hint": "Search vegetables, fruits e.t.c",
+  "seller_home_best_sellers": "Best sellers",
+  "seller_home_no_best_sellers": "No best sellers yet",
+  "seller_home_no_best_sellers_desc": "Products with the highest sales will appear here.",
+  "seller_home_available_products": "Available products",
+  "seller_home_pending_approval": "Products pending approval",
+  "seller_home_no_products": "No products yet",
+  "seller_home_pending_approval_desc": "Your products are awaiting admin review. They will appear here once approved.",
+  "seller_home_add_first_product": "Add your first product to start selling.",
+  "seller_home_products_in_stock": "Products in stock",
+  "seller_home_pending_orders": "Pending orders",
+  "seller_home_add_new_product": "Add new product",
+  "product_pending_review": "Pending Review",
+  "product_pending_review_message": "Admin is reviewing this product. It will appear once approved.",
+
+  "seller_categories_title": "Categories",
+  "seller_products_title": "Products",
+
+  "seller_orders_title": "Orders",
+  "seller_orders_history": "Order history",
+  "seller_orders_active": "Active",
+  "seller_orders_pending": "Pending",
+  "seller_orders_completed": "Completed",
+  "seller_orders_confirmed": "Confirmed",
+  "seller_orders_processed": "Processed",
+  "seller_orders_shipped": "Shipped",
+  "seller_orders_delivered": "Delivered",
+  "seller_orders_to": "To: {customerName}",
+  "@seller_orders_to": {
+    "placeholders": {
+      "customerName": { "type": "String" }
+    }
+  },
+  "seller_orders_rider": "Rider: {riderName}",
+  "@seller_orders_rider": {
+    "placeholders": {
+      "riderName": { "type": "String" }
+    }
+  },
+  "seller_orders_price": "Price: ",
+  "seller_orders_placed_on": "Placed on {date}.",
+  "@seller_orders_placed_on": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "seller_orders_assign_rider": "Assign Rider",
+  "seller_orders_no_active": "No active orders",
+  "seller_orders_no_active_desc": "Active orders will appear here.",
+  "seller_orders_no_pending": "No pending orders",
+  "seller_orders_no_pending_desc": "Orders awaiting rider assignment will appear here.",
+  "seller_orders_no_completed": "No completed orders",
+  "seller_orders_no_completed_desc": "Completed orders will appear here.",
+  "seller_orders_no_history": "No order history",
+  "seller_orders_no_history_desc": "Past orders will appear here.",
+  "seller_orders_status_completed": "Completed",
+
+  "product_type_standard": "Standard",
+  "product_type_fragile": "Fragile",
+  "product_type_bulky": "Bulky",
+  "product_type_heavy": "Heavy",
+
+  "seller_product_list_available": "Available",
+  "seller_product_list_out_of_stock": "Out of stock",
+  "seller_product_list_no_available": "No products available",
+  "seller_product_list_no_available_desc": "Products you add will appear here.",
+  "seller_product_list_no_out_of_stock": "No out-of-stock products",
+  "seller_product_list_all_in_stock": "All your products are in stock.",
+
+  "seller_add_product_title": "Add Product",
+  "seller_add_product_select_hint": "Please select a category and at least one image",
+  "seller_add_product_name_price_hint": "Please enter product name and price",
+  "seller_add_product_success": "Product added successfully",
+  "seller_add_product_failed": "Failed to create product: {error}",
+  "@seller_add_product_failed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "earnings_title": "Earnings",
+  "earnings_youve_earned": "You've earned ",
+  "earnings_available_withdrawal": " available for withdrawal.",
+  "earnings_loading": "Loading earnings...",
+  "earnings_error": "Could not load earnings.",
+  "earnings_breakdown": "Available: {available} | Pending: {pending} | Withdrawn: {withdrawn}",
+  "@earnings_breakdown": {
+    "placeholders": {
+      "available": { "type": "String" },
+      "pending": { "type": "String" },
+      "withdrawn": { "type": "String" }
+    }
+  },
+  "earnings_total": "Total Earnings",
+  "earnings_history": "Earning history",
+  "earnings_actions": "Actions",
+  "earnings_manage_bank": "Manage bank account",
+  "earnings_withdraw": "Withdraw",
+  "earnings_set_default": "Set as default",
+
+  "password_mismatch": "Passwords do not match",
+  "password_updated": "Password updated successfully",
+  "password_confirm_new": "Confirm new password",
+
+  "location_pickup": "Pickup location",
+  "location_dropoff": "Dropoff location",
+
+  "rider_home_greeting": "Welcome {name},",
+  "@rider_home_greeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "rider_online": "You are online",
+  "rider_go_online": "Go online to receive delivery requests",
+  "rider_total_earnings": "Total Earnings",
+  "rider_payment_history": "Payment history",
+  "rider_completed_today": "Completed deliveries today",
+  "rider_pending_deliveries": "Pending deliveries",
+  "rider_active_delivery": "Active delivery",
+  "rider_no_active_deliveries": "No active deliveries",
+  "rider_live_location": "Live location",
+  "rider_accept_delivery": "Accept delivery",
+  "rider_heading_to_pick": "Heading to pick",
+  "rider_picked_up": "Picked up",
+  "rider_delivered_label": "Delivered",
+  "rider_delivery_soon": "Soon",
+
+  "rider_deliveries_title": "Deliveries",
+  "rider_delivery_history": "Delivery history",
+  "rider_deliveries_active": "Active",
+  "rider_deliveries_pending": "Pending",
+  "rider_deliveries_completed": "Completed",
+  "rider_no_deliveries": "No Deliveries Yet",
+  "rider_no_deliveries_desc": "When you complete a delivery run, your full summary history will appear right here.",
+  "rider_no_completed_deliveries": "No Completed Deliveries",
+  "rider_no_completed_deliveries_desc": "Your completed delivery history will appear here once you finish your first run.",
+  "rider_order_ref": "Order {orderRef}",
+  "@rider_order_ref": {
+    "placeholders": {
+      "orderRef": { "type": "String" }
+    }
+  },
+  "rider_to_customer": "To: {customerName}",
+  "@rider_to_customer": {
+    "placeholders": {
+      "customerName": { "type": "String" }
+    }
+  },
+  "rider_status_completed": "Completed",
+
+  "wallet_title": "Wallet",
+  "wallet_earned_prefix": "You've earned ",
+  "wallet_earned_suffix": " so far this week. You are doing great.",
+  "wallet_set_default": "Set as default",
+  "wallet_history": "Earning history",
+  "wallet_breakdown": "{percent}% of {amount} total lifetime earnings",
+  "@wallet_breakdown": {
+    "placeholders": {
+      "percent": { "type": "String" },
+      "amount": { "type": "String" }
+    }
+  },
+  "wallet_actions": "Actions",
+  "wallet_manage_bank": "Manage bank account",
+  "wallet_withdraw": "Withdraw",
+
+  "rider_withdraw_btn": "Withdraw",
+  "rider_enter_hint": "Enter here",
+  "rider_fill_fields_hint": "Please fill all fields",
+
+  "rider_bank_add_tab": "Add bank account",
+  "rider_bank_manage_tab": "Manage bank accounts",
+  "rider_bank_added": "Bank account added",
+  "rider_bank_add_button": "Add bank account",
+
+  "rider_profile_update": "Update",
+
+  "notif_empty_title": "No notifications",
+  "notif_empty_desc": "You're all caught up!",
+  "notif_today": "Today",
+  "notif_older": "Older",
+
+  "support_phone": "Phone",
+  "support_email": "Email",
+
+  "snackbar_fill_fields": "Please fill all fields",
+  "snackbar_bank_added": "Bank account added",
+  "snackbar_password_mismatch": "Passwords do not match",
+  "snackbar_password_updated": "Password updated successfully",
+  "snackbar_amount_exceeds": "Amount exceeds available balance of ₦{amount}",
+  "@snackbar_amount_exceeds": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "snackbar_withdrawal_initiated": "Withdrawal of ₦{withdrawalAmount} initiated",
+  "@snackbar_withdrawal_initiated": {
+    "placeholders": {
+      "withdrawalAmount": { "type": "String" }
+    }
+  },
+  "snackbar_status_updated": "Status updated to {status}",
+  "@snackbar_status_updated": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "snackbar_update_failed": "Update failed: {error}",
+  "@snackbar_update_failed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "snackbar_select_category_image": "Please select a category and at least one image",
+  "snackbar_enter_name_price": "Please enter product name and price",
+  "snackbar_product_added": "Product added successfully",
+  "snackbar_product_failed": "Failed to create product: {error}",
+  "@snackbar_product_failed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "payment_placing_order": "Placing Order...",
+  "payment_initiating": "Initiating Payment...",
+  "payment_processing": "Processing Payment",
+  "payment_verifying": "Verifying Payment...",
+  "payment_success": "Payment Successful",
+  "payment_failed": "Payment Failed",
+  "payment_check_manually": "We're verifying your transaction. Tap to check manually.",
+  "payment_check_now": "Check Now",
+  "payment_go_home": "Back to Home",
+  "payment_verifying_background": "Verifying payment in the background...",
+  "payment_order_placed": "Order placed successfully",
+
+  "products_out_of_stock": "Out of Stock",
+  "stock_error_title": "Out of Stock",
+  "stock_error_message": "Some items in your basket are no longer available in the requested quantity. Please update your basket to proceed.",
+  "stock_error_review_basket": "Review Basket"
+}

@@ -1,0 +1,65 @@
+import 'package:market_mate/core/network/api_client.dart';
+import 'package:market_mate/core/network/api_endpoints.dart' show ApiEndpoints;
+
+class RiderRepository {
+  final ApiClient _client = ApiClient();
+
+  Future<List<Map<String, dynamic>>> getMyOrders({String? status}) async {
+    final query = <String, String>{};
+    if (status != null) query['status'] = status;
+    final res = await _client.get(ApiEndpoints.ridersMeOrders, query: query);
+    if (!res.success) throw Exception(res.message);
+    return res.dataList.cast<Map<String, dynamic>>();
+  }
+
+  Future<void> updateOnlineStatus(bool online) async {
+    final res = await _client.patch(
+      ApiEndpoints.ridersMeStatus,
+      body: {'isOnline': online},
+    );
+    if (!res.success) throw Exception(res.message);
+  }
+
+  Future<void> confirmPickup(String orderId) async {
+    final res = await _client.patch(ApiEndpoints.orderPickupConfirm(orderId));
+    if (!res.success) throw Exception(res.message);
+  }
+
+  Future<void> markArrived(String orderId) async {
+    final res = await _client.patch(ApiEndpoints.orderArrived(orderId));
+    if (!res.success) throw Exception(res.message);
+  }
+
+  Future<void> completeOrder(String orderId) async {
+    final res = await _client.patch(ApiEndpoints.orderComplete(orderId));
+    if (!res.success) throw Exception(res.message);
+  }
+
+  Future<void> acceptOrder(String orderId) async {
+    final res = await _client.patch(ApiEndpoints.orderAccept(orderId));
+    if (!res.success) throw Exception(res.message);
+  }
+
+  Future<Map<String, dynamic>> getWallet() async {
+    final res = await _client.get(ApiEndpoints.ridersMeWallet);
+    if (!res.success) throw Exception(res.message);
+    return (res.data ?? {}) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> withdraw(Map<String, dynamic> body) async {
+    final res = await _client.post(ApiEndpoints.ridersMeWalletWithdraw, body: body);
+    if (!res.success) throw Exception(res.message);
+    return (res.data ?? {}) as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> getBankAccounts() async {
+    final res = await _client.get(ApiEndpoints.ridersMeBank);
+    if (!res.success) throw Exception(res.message);
+    return res.dataList.cast<Map<String, dynamic>>();
+  }
+
+  Future<void> addBankAccount(Map<String, dynamic> body) async {
+    final res = await _client.post(ApiEndpoints.ridersMeBank, body: body);
+    if (!res.success) throw Exception(res.message);
+  }
+}
