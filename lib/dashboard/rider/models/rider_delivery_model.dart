@@ -77,4 +77,82 @@ class RiderDeliveryModel {
   double get total => items.fold(0, (s, i) => s + i.total);
 
   String get formattedTotal => '#${RiderDeliveryItem._fmt(total)}';
+
+  /// Tolerant parser for live API responses (active order / pending
+  /// assignments). Every field falls back to a safe default so a missing or
+  /// differently-named key never crashes the UI.
+  factory RiderDeliveryModel.fromJson(Map<String, dynamic> json) {
+    String s(String key) => json[key] is String ? json[key] as String : '';
+    Object? o(String key) => json[key];
+    String nested(Object? value) {
+      if (value == null) return '';
+      if (value is String) return value;
+      if (value is Map) {
+        return (value['name'] ?? value['address'] ?? value['title'] ?? value['formatted'])
+            .toString();
+      }
+      return value.toString();
+    }
+
+    final customer = o('customer');
+    final pickup = o('pickupAddress') ?? o('pickup') ?? o('from');
+    final dropoff = o('dropoffAddress') ?? o('dropoff') ?? o('to');
+
+    final statusRaw = (s('status').isEmpty ? s('deliveryStatus') : s('status')).toLowerCase();
+    final status = statusRaw.contains('complete')
+        ? RiderDeliveryStatus.completed
+        : statusRaw.contains('pending') || statusRaw.contains('assign')
+            ? RiderDeliveryStatus.pending
+            : RiderDeliveryStatus.active;
+
+    final stepRaw = (s('currentStep').isEmpty ? s('step') : s('currentStep')).toLowerCase();
+    final currentStep = stepRaw.contains('deliver')
+        ? RiderDeliveryStep.delivered
+        : stepRaw.contains('pick')
+            ? RiderDeliveryStep.pickedUp
+            : stepRaw.contains('heading') || stepRaw.contains('arrive')
+                ? RiderDeliveryStep.headingToPick
+                : RiderDeliveryStep.accepted;
+
+    final itemsRaw = o('items');
+    final items = <RiderDeliveryItem>[];
+    if (itemsRaw is List) {
+      for (final raw in itemsRaw) {
+        if (raw is Map<String, dynamic>) {
+          final price = (raw['price'] ?? raw['unitPrice'] ?? raw['amount'] ?? 0);
+          final qty = raw['quantity'] ?? raw['qty'] ?? 1;
+          items.add(RiderDeliveryItem(
+            name: (raw['name'] ?? raw['productName'] ?? raw['title'] ?? '').toString(),
+            imageAsset: (raw['image'] ?? raw['imageUrl'] ?? '').toString(),
+            quantity: qty is num ? qty.toInt() : 1,
+            unitPrice: price is num
+                ? price.toDouble()
+                : double.tryParse(price.toString()) ?? 0,
+          ));
+        }
+      }
+    }
+
+    return RiderDeliveryModel(
+      id: s('id').isEmpty ? s('_id') : s('id'),
+      orderRef: s('orderRef').isEmpty ? s('order_ref') : s('orderRef'),
+      customerName: nested(customer),
+      placedDate: s('placedDate').isEmpty ? s('createdAt') : s('placedDate'),
+      dateRange: s('dateRange'),
+      pickupAddress: nested(pickup),
+      dropoffAddress: nested(dropoff),
+      status: status,
+      currentStep: currentStep,
+      riderName: s('riderName'),
+      riderCode: s('riderCode'),
+      riderStatus: s('riderStatus'),
+      lastUpdate: s('lastUpdate').isEmpty ? s('updatedAt') : s('lastUpdate'),
+      lastLocation: s('lastLocation'),
+      estimatedDelivery: s('estimatedDelivery'),
+      items: items,
+      deliveryAddress: s('deliveryAddress').isEmpty ? nested(dropoff) : s('deliveryAddress'),
+      paymentMethod: s('paymentMethod'),
+      maskedCard: s('maskedCard'),
+    );
+  }
 }

@@ -377,7 +377,7 @@ class AppLocalizationsHa extends AppLocalizations {
   String get checkout_delivery_fee => 'Kuɗin bayarwa';
 
   @override
-  String get checkout_commission => 'Kwamishiniya (0.05%)';
+  String get checkout_commission => 'Kuɗin sabis';
 
   @override
   String get checkout_total_label => 'Jimla';

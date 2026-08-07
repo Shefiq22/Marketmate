@@ -37,3 +37,6 @@ auth_key.json
 .vscode/
 .idea/
 *.iml
+
+# FVM Version Cache
+.fvm/

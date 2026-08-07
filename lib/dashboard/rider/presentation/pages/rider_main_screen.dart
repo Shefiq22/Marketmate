@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:market_mate/core/providers/locale_provider.dart';
 import 'package:market_mate/core/theme/app_colors.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
+import 'package:market_mate/dashboard/rider/providers/rider_dashboard_provider.dart';
 import 'rider_home_page.dart';
 import 'rider_deliveries_page.dart';
 import 'rider_wallet_page.dart';
@@ -17,8 +18,6 @@ class RiderMainScreen extends ConsumerStatefulWidget {
 }
 
 class _RiderMainScreenState extends ConsumerState<RiderMainScreen> {
-  int _currentIndex = 0;
-
   final _screens = const [
     RiderHomePage(),
     RiderDeliveriesPage(),
@@ -41,14 +40,19 @@ class _RiderMainScreenState extends ConsumerState<RiderMainScreen> {
     final padding = MediaQuery.paddingOf(context);
     final isTablet = size.shortestSide >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentIndex = ref.watch(riderMainTabProvider);
 
     final navLabels = [l10n.nav_home, l10n.nav_deliveries, l10n.nav_wallet, l10n.nav_profile];
 
+    void selectTab(int index) {
+      ref.read(riderMainTabProvider.notifier).state = index;
+    }
+
     return PopScope(
-      canPop: _currentIndex == 0,
+      canPop: currentIndex == 0,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && _currentIndex != 0) {
-          setState(() => _currentIndex = 0);
+        if (!didPop && currentIndex != 0) {
+          selectTab(0);
         }
       },
       child: Scaffold(
@@ -56,7 +60,7 @@ class _RiderMainScreenState extends ConsumerState<RiderMainScreen> {
         extendBody: true,
         body: HeroMode(
           enabled: false,
-          child: IndexedStack(index: _currentIndex, children: _screens),
+          child: IndexedStack(index: currentIndex, children: _screens),
         ),
         bottomNavigationBar: Padding(
           padding: EdgeInsets.fromLTRB(
@@ -87,32 +91,32 @@ class _RiderMainScreenState extends ConsumerState<RiderMainScreen> {
                   iconPath: _navIcons[0],
                   label: navLabels[0],
                   index: 0,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 0),
+                  current: currentIndex,
+                  onTap: () => selectTab(0),
                   isTablet: isTablet,
                 ),
                 _RiderNavItem(
                   iconPath: _navIcons[1],
                   label: navLabels[1],
                   index: 1,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 1),
+                  current: currentIndex,
+                  onTap: () => selectTab(1),
                   isTablet: isTablet,
                 ),
                 _RiderNavItem(
                   iconPath: _navIcons[2],
                   label: navLabels[2],
                   index: 2,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 2),
+                  current: currentIndex,
+                  onTap: () => selectTab(2),
                   isTablet: isTablet,
                 ),
                 _RiderNavItem(
                   iconPath: _navIcons[3],
                   label: navLabels[3],
                   index: 3,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  current: currentIndex,
+                  onTap: () => selectTab(3),
                   isTablet: isTablet,
                 ),
               ],

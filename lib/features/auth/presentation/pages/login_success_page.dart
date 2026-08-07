@@ -108,7 +108,18 @@ class _LoginSuccessPageState extends ConsumerState<LoginSuccessPage>
     final padding = MediaQuery.paddingOf(context);
     final isTablet = size.shortestSide >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final confettiSize = isTablet ? size.width * 0.55 : size.width * 0.72;
+
+    // Cap the confetti image so it can't dominate short/small-height screens,
+    // not just narrow-width ones.
+    final confettiWidthTarget = isTablet ? size.width * 0.55 : size.width * 0.72;
+    final confettiSize = confettiWidthTarget.clamp(120.0, size.height * 0.32);
+
+    // Clamp text scaling so a user's large system font size can't blow the
+    // layout out on its own.
+    final textScaler = MediaQuery.textScalerOf(context).clamp(
+      minScaleFactor: 0.9,
+      maxScaleFactor: 1.2,
+    );
 
     return Stack(
       children: [
@@ -117,100 +128,119 @@ class _LoginSuccessPageState extends ConsumerState<LoginSuccessPage>
               ? AppColors.scaffoldDark
               : AppColors.scaffoldLight,
           body: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? size.width * 0.12 : 32.0,
-              ),
-              child: Column(
-                children: [
-                  SizedBox(height: size.height * 0.1),
-                  FadeTransition(
-                    opacity: _confettiFade,
-                    child: ScaleTransition(
-                      scale: _confettiScale,
-                      child: Image.asset(
-                        'assets/images/congrats.png',
-                        width: confettiSize,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) =>
-                            SizedBox(height: confettiSize * 0.55),
-                      ),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? size.width * 0.12 : 32.0,
                     ),
-                  ),
-                  FadeTransition(
-                    opacity: _checkFade,
-                    child: ScaleTransition(
-                      scale: _checkScale,
-                      child: Icon(
-                        Icons.check_circle_rounded,
-                        color: AppColors.primary,
-                        size: isTablet ? 120.0 : 102.0,
+                    // Guarantees the column at least fills the viewport
+                    // (so Spacer/bottom button still behaves normally),
+                    // but lets it grow and scroll if content is taller
+                    // than the screen — this is what removes the overflow.
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
                       ),
-                    ),
-                  ),
-                  SizedBox(height: size.height * 0.015),
-                  FadeTransition(
-                    opacity: _contentFade,
-                    child: SlideTransition(
-                      position: _contentSlide,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Login\nsuccessful!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: isTablet ? 30.0 : 24.0,
-                              fontWeight: FontWeight.w800,
-                              color: isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.black,
-                              letterSpacing: -0.4,
-                              height: 1.3,
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: [
+                            SizedBox(height: size.height * 0.08),
+                            FadeTransition(
+                              opacity: _confettiFade,
+                              child: ScaleTransition(
+                                scale: _confettiScale,
+                                child: Image.asset(
+                                  'assets/images/congrats.png',
+                                  width: confettiSize,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) =>
+                                      SizedBox(height: confettiSize * 0.55),
+                                ),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: size.height * 0.018),
-                          Text(
-                            'Welcome back! You have successfully\nlogged in to your account.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: isTablet ? 20.0 : 17.0,
-                              fontWeight: FontWeight.w400,
-                              color: isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondary,
-                              height: 1.6,
+                            FadeTransition(
+                              opacity: _checkFade,
+                              child: ScaleTransition(
+                                scale: _checkScale,
+                                child: Icon(
+                                  Icons.check_circle_rounded,
+                                  color: AppColors.primary,
+                                  size: isTablet ? 120.0 : 96.0,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  FadeTransition(
-                    opacity: _contentFade,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: isTablet ? 64 : 56,
-                      child: ElevatedButton(
-                        onPressed: _proceed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: const StadiumBorder(),
-                          elevation: 0,
-                          textStyle: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
-                            fontSize: isTablet ? 18 : 17,
-                            fontWeight: FontWeight.w700,
-                          ),
+                            SizedBox(height: size.height * 0.015),
+                            FadeTransition(
+                              opacity: _contentFade,
+                              child: SlideTransition(
+                                position: _contentSlide,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Login\nsuccessful!',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        fontSize: isTablet ? 30.0 : 24.0,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark
+                                            ? AppColors.textPrimaryDark
+                                            : AppColors.black,
+                                        letterSpacing: -0.4,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                    SizedBox(height: size.height * 0.018),
+                                    Text(
+                                      'Welcome back! You have successfully\nlogged in to your account.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        fontSize: isTablet ? 20.0 : 17.0,
+                                        fontWeight: FontWeight.w400,
+                                        color: isDark
+                                            ? AppColors.textSecondaryDark
+                                            : AppColors.textSecondary,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            SizedBox(height: size.height * 0.03),
+                            FadeTransition(
+                              opacity: _contentFade,
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: isTablet ? 64 : 56,
+                                child: ElevatedButton(
+                                  onPressed: _proceed,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    shape: const StadiumBorder(),
+                                    elevation: 0,
+                                    textStyle: TextStyle(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      fontSize: isTablet ? 18 : 17,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  child: const Text('Proceed to Home'),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: padding.bottom + 20),
+                          ],
                         ),
-                        child: const Text('Proceed to Home'),
                       ),
                     ),
-                  ),
-                  SizedBox(height: padding.bottom + 28),
-                ],
+                  );
+                },
               ),
             ),
           ),

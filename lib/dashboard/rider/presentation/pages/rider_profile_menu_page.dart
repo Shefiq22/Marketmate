@@ -6,6 +6,8 @@ import 'package:market_mate/l10n/app_localizations.dart';
 import 'package:market_mate/core/providers/theme_provider.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import 'package:market_mate/features/auth/provider/current_user_provider.dart';
+import 'package:market_mate/features/auth/presentation/pages/login_page.dart';
+import 'package:market_mate/dashboard/rider/providers/rider_dashboard_provider.dart';
 import 'rider_wallet_page.dart';
 import 'rider_manage_bank_page.dart';
 import 'rider_profile_page.dart';
@@ -305,7 +307,16 @@ class RiderProfileMenuPage extends ConsumerWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                     ref.read(currentUserProvider.notifier).clear();
-                    ref.read(authProvider.notifier).logout();
+                    ref.read(authProvider.notifier).logout().then((_) {
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const LoginPage(),
+                          ),
+                          (_) => false,
+                        );
+                      }
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.error,
@@ -321,7 +332,10 @@ class RiderProfileMenuPage extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(riderMainTabProvider.notifier).state = 0;
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(

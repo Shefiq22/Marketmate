@@ -132,7 +132,7 @@
   "checkout_saved_card": "Saved card",
   "checkout_paystack": "Paystack",
   "checkout_delivery_fee": "Delivery fee",
-  "checkout_commission": "Commission (0.05%)",
+  "checkout_commission": "Service fee",
   "checkout_total_label": "Total",
   "checkout_add_address": "Add new address",
   "checkout_add_address_hint": "Abeg add delivery address",

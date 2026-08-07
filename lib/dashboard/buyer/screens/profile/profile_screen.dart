@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:market_mate/core/network/api_client.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import 'package:market_mate/features/auth/provider/current_user_provider.dart';
+import 'package:market_mate/features/auth/presentation/pages/login_page.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import 'package:market_mate/dashboard/seller/pages/sellers_messages_page.dart';
 import 'package:market_mate/dashboard/seller/pages/seller_alert_preferences_page.dart';
@@ -380,7 +381,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                     ref.read(currentUserProvider.notifier).clear();
-                    ref.read(authProvider.notifier).logout();
+                    ref.read(authProvider.notifier).logout().then((_) {
+                      if (context.mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const LoginPage(),
+                          ),
+                          (_) => false,
+                        );
+                      }
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.error,

@@ -17,6 +17,12 @@
     <key>NSDocumentDirectoryUsageDescription</key>
     <string>Market Mate needs access to your files so you can attach documents like PDFs and Word files.</string>
 
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Market Mate uses your location to let riders send live delivery updates.</string>
+
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Market Mate continues sending your location while you are on an active delivery.</string>
+
     <!-- ─── Bundle ────────────────────────────────────────────────────── -->
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>

@@ -370,7 +370,7 @@ class AppLocalizationsIg extends AppLocalizations {
   String get checkout_delivery_fee => 'Ego mbupụ';
 
   @override
-  String get checkout_commission => 'Kọmishọn (0.05%)';
+  String get checkout_commission => 'Ego ọrụ';
 
   @override
   String get checkout_total_label => 'Mkpokọta';

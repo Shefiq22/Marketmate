@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
@@ -377,10 +378,32 @@ class _ListProductCard extends StatelessWidget {
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(12),
               ),
-              child: AppNetworkImage(
-                imageUrl: product.imageUrl,
-                width: listImg,
-                height: listImg,
+              child: Stack(
+                children: [
+                  ImageFiltered(
+                    imageFilter: outOfStock
+                        ? ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5)
+                        : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                    child: ColorFiltered(
+                      colorFilter: outOfStock
+                          ? const ColorFilter.mode(
+                              Colors.grey, BlendMode.saturation)
+                          : const ColorFilter.mode(
+                              Colors.transparent, BlendMode.dst),
+                      child: AppNetworkImage(
+                        imageUrl: product.imageUrl,
+                        width: listImg,
+                        height: listImg,
+                      ),
+                    ),
+                  ),
+                  if (outOfStock)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.18),
+                      ),
+                    ),
+                ],
               ),
             ),
             SizedBox(width: s12),

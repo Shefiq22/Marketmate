@@ -1,5 +1,6 @@
 import 'package:market_mate/core/network/api_client.dart';
 import 'package:market_mate/core/network/api_endpoints.dart' show ApiEndpoints;
+import '../models/rider_delivery_model.dart';
 
 class RiderRepository {
   final ApiClient _client = ApiClient();
@@ -16,6 +17,45 @@ class RiderRepository {
     final res = await _client.patch(
       ApiEndpoints.ridersMeStatus,
       body: {'isOnline': online},
+    );
+    if (!res.success) throw Exception(res.message);
+  }
+
+  /// GET {{baseUrl}}/riders/orders/active — returns the rider's current
+  /// delivery, or null when there is no active delivery.
+  Future<RiderDeliveryModel?> getActiveOrder() async {
+    final res = await _client.get(ApiEndpoints.ridersActiveOrder);
+    if (!res.success) return null;
+    final data = res.data;
+    if (data is! Map) return null;
+    final map = Map<String, dynamic>.from(data);
+    // The payload may wrap the order under an 'order'/'data' key.
+    final order = (map['order'] is Map)
+        ? Map<String, dynamic>.from(map['order'] as Map)
+        : map;
+    return RiderDeliveryModel.fromJson(order);
+  }
+
+  /// GET {{baseUrl}}/riders/assignments/pending — deliveries waiting for the
+  /// rider to accept or decline.
+  Future<List<RiderDeliveryModel>> getPendingAssignments() async {
+    final res = await _client.get(ApiEndpoints.ridersPendingAssignments);
+    if (!res.success) return [];
+    return res.dataList
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .map(RiderDeliveryModel.fromJson)
+        .toList();
+  }
+
+  /// PATCH {{baseUrl}}/riders/location — sends the rider's live position.
+  Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+  }) async {
+    final res = await _client.patch(
+      ApiEndpoints.ridersLocation,
+      body: {'longitude': longitude, 'latitude': latitude},
     );
     if (!res.success) throw Exception(res.message);
   }

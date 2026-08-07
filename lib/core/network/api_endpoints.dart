@@ -51,6 +51,9 @@ class ApiEndpoints {
   static const String ridersSearch = '$_v1/riders/search';
   static const String ridersMeOrders = '$_v1/riders/me/orders';
   static const String ridersMeStatus = '$_v1/riders/me/status';
+  static const String ridersActiveOrder = '$_v1/riders/orders/active';
+  static const String ridersPendingAssignments = '$_v1/riders/assignments/pending';
+  static const String ridersLocation = '$_v1/riders/location';
   static String riderReviews(String riderId) => '$_v1/riders/$riderId/reviews';
 
   // Messages

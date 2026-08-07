@@ -372,7 +372,7 @@ class AppLocalizationsYo extends AppLocalizations {
   String get checkout_delivery_fee => 'Owó ìfiwe';
 
   @override
-  String get checkout_commission => 'Ìgbìmọ̀ (0.05%)';
+  String get checkout_commission => 'Owó iṣẹ́';
 
   @override
   String get checkout_total_label => 'Lápapọ̀';

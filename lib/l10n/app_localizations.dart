@@ -815,7 +815,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkout_commission.
   ///
   /// In en, this message translates to:
-  /// **'Commission (0.05%)'**
+  /// **'Service fee'**
   String get checkout_commission;
 
   /// No description provided for @checkout_total_label.

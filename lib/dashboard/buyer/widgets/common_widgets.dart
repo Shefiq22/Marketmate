@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
@@ -69,6 +70,32 @@ class AppNetworkImage extends StatelessWidget {
   }
 }
 
+// ─────────────── Sold Out Pill (tiny, side badge) ───────────────
+class SoldOutPill extends StatelessWidget {
+  final Color color;
+  const SoldOutPill({super.key, this.color = AppColors.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'Sold out',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+}
+
 // ─────────────── Product Card ───────────────
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -99,81 +126,91 @@ class ProductCard extends StatelessWidget {
     final outOfStock = !product.inStock;
 
     return GestureDetector(
+      // Sold-out products cannot be opened to buy from this card.
       onTap: outOfStock ? null : onTap,
-      child: Opacity(
-        opacity: outOfStock ? 0.5 : 1.0,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkElevated : AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.border,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkElevated : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: outOfStock
+                ? AppColors.error.withValues(alpha: 0.35)
+                : (isDark ? AppColors.darkBorder : AppColors.border),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+              child: Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: product.imageUrl,
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => _imageFallback(context),
-                      errorWidget: (_, __, ___) => _imageFallback(context),
+                  // Blurred + greyed-out image when sold out, matching the
+                  // treatment used on the vendor store page.
+                  ImageFiltered(
+                    imageFilter: outOfStock
+                        ? ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5)
+                        : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                    child: ColorFiltered(
+                      colorFilter: outOfStock
+                          ? const ColorFilter.mode(
+                              Colors.grey, BlendMode.saturation)
+                          : const ColorFilter.mode(
+                              Colors.transparent, BlendMode.dst),
+                      child: CachedNetworkImage(
+                        imageUrl: product.imageUrl,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => _imageFallback(context),
+                        errorWidget: (_, __, ___) => _imageFallback(context),
+                      ),
                     ),
                   ),
                   if (outOfStock)
-                    Positioned(
-                      top: 8,
-                      left: 8,
+                    Positioned.fill(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          'Out of Stock',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.white,
-                          ),
-                        ),
+                        color: Colors.black.withValues(alpha: 0.18),
                       ),
                     ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(10),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Opacity(
+                opacity: outOfStock ? 0.55 : 1.0,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.category,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.grey500,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.category,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.grey500,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        // Tiny "Sold out" badge sits beside the category
+                        // label instead of taking over the whole card.
+                        if (outOfStock) const SoldOutPill(),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -188,7 +225,7 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '₦${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+                      formatPrice(product.price),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -197,26 +234,8 @@ class ProductCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     if (outOfStock)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Out of Stock',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.error,
-                            ),
-                          ),
-                        ),
-                      )
+                      // No way to add a sold-out product to the cart.
+                      const SizedBox.shrink()
                     else if (inCart)
                       _QtyControls(productId: product.id)
                     else
@@ -245,8 +264,8 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -489,17 +508,17 @@ class GreenButton extends StatelessWidget {
                   ),
                 )
               : Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: _disabled
-                  ? AppColors.textSecondary
-                  : outlined
-                      ? AppColors.primary
-                      : AppColors.white,
-            ),
-          ),
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _disabled
+                        ? AppColors.textSecondary
+                        : outlined
+                            ? AppColors.primary
+                            : AppColors.white,
+                  ),
+                ),
         ),
       ),
     );

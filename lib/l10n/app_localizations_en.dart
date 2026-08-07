@@ -370,7 +370,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkout_delivery_fee => 'Delivery fee';
 
   @override
-  String get checkout_commission => 'Commission (0.05%)';
+  String get checkout_commission => 'Service fee';
 
   @override
   String get checkout_total_label => 'Total';
