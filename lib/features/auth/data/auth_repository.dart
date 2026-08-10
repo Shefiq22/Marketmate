@@ -18,6 +18,7 @@ class AuthRepository {
     required String phone,
     required String password,
     required String role,
+    String? referralCode,
   }) async {
     final res = await _client.post(ApiEndpoints.register, body: {
       'name': name,
@@ -25,6 +26,8 @@ class AuthRepository {
       'phone': _formatPhone(phone),
       'password': password,
       'role': role,
+      if (referralCode != null && referralCode.trim().isNotEmpty)
+        'referralCode': referralCode.trim().toUpperCase(),
     });
     if (!res.success) throw AuthException(res.message, statusCode: res.statusCode);
     final data = res.data as Map<String, dynamic>;

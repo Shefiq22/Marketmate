@@ -3,7 +3,9 @@ import 'package:market_mate/features/chat/presentation/pages/order_chat_page.dar
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../models/models.dart';
+import '../../providers/orders_provider.dart';
 import '../../widgets/common_widgets.dart';
+import 'order_complete_screen.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   final Order order;
@@ -64,6 +66,30 @@ class OrderDetailScreen extends StatelessWidget {
                   const SizedBox(height: 24.0),
 
                   _OrderProgress(status: order.status),
+
+                  if (orderAwaitsCustomerConfirmation(order.status)) ...[
+                    const SizedBox(height: 16.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => OrderCompleteScreen(order: order),
+                          ),
+                        ),
+                        icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                        label: const Text('Complete Order'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                  ],
 
                   const SizedBox(height: 24.0),
 

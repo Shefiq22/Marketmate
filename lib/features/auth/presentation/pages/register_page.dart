@@ -408,6 +408,38 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           isTablet: isTablet,
                         ),
                       ],
+                      SizedBox(
+                        height: isTablet ? size.height * 0.029 : size.height * 0.024,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: size.height * 0.012),
+                        child: Text(
+                          'Referral code (optional)',
+                          style: TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: labelSize,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.black,
+                          ),
+                        ),
+                      ),
+                      TextField(
+                        onChanged: notifier.setReferralCode,
+                        textCapitalization: TextCapitalization.characters,
+                        textInputAction: TextInputAction.done,
+                        style: inputStyle(),
+                        decoration: fieldDecoration(
+                          hint: 'Enter referral code (if any)',
+                          prefix: Padding(
+                            padding: EdgeInsets.all(size.height * 0.018),
+                            child: Icon(
+                              Icons.card_giftcard_outlined,
+                              color: AppColors.gray2,
+                              size: isTablet ? 22 : 20,
+                            ),
+                          ),
+                        ),
+                      ),
                       if (form.error != null)
                         Padding(
                           padding: EdgeInsets.only(bottom: size.height * 0.016),

@@ -242,6 +242,7 @@ class RegisterFormState {
   final String phone;
   final String email;
   final String password;
+  final String referralCode;
   final bool passwordVisible;
   final bool isLoading;
   final String? error;
@@ -252,6 +253,7 @@ class RegisterFormState {
     this.phone = '',
     this.email = '',
     this.password = '',
+    this.referralCode = '',
     this.passwordVisible = false,
     this.isLoading = false,
     this.error,
@@ -263,6 +265,7 @@ class RegisterFormState {
     String? phone,
     String? email,
     String? password,
+    String? referralCode,
     bool? passwordVisible,
     bool? isLoading,
     String? error,
@@ -272,6 +275,7 @@ class RegisterFormState {
     phone: phone ?? this.phone,
     email: email ?? this.email,
     password: password ?? this.password,
+    referralCode: referralCode ?? this.referralCode,
     passwordVisible: passwordVisible ?? this.passwordVisible,
     isLoading: isLoading ?? this.isLoading,
     error: error,
@@ -294,6 +298,8 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
   void setPhone(String v) => state = state.copyWith(phone: v, error: null);
   void setPassword(String v) =>
       state = state.copyWith(password: v, error: null);
+  void setReferralCode(String v) =>
+      state = state.copyWith(referralCode: v, error: null);
   void togglePassword() =>
       state = state.copyWith(passwordVisible: !state.passwordVisible);
 
@@ -308,6 +314,7 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
         phone: state.phone,
         password: state.password,
         role: userRoleToApi(role ?? UserRole.retailerOrConsumer),
+        referralCode: state.referralCode,
       );
       final userId = _extractUserId(data);
       if (userId == null) {
@@ -388,6 +395,9 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
     }
     if (lower.contains('phone') && lower.contains('invalid')) {
       return 'Please enter a valid phone number.';
+    }
+    if (lower.contains('referral') && (lower.contains('invalid') || lower.contains('not found'))) {
+      return 'That referral code is invalid. Check it and try again, or leave it blank.';
     }
     if (statusCode != null && statusCode >= 500) {
       return 'Server issue occurred. Please try again later.';

@@ -23,6 +23,12 @@ class OrdersRepository {
     return _parseOrder(res.data as Map<String, dynamic>);
   }
 
+  Future<Order> completeOrder(String orderId) async {
+    final res = await _client.patch(ApiEndpoints.orderCustomerComplete(orderId));
+    if (!res.success) throw Exception(res.message);
+    return _parseOrder(res.data as Map<String, dynamic>);
+  }
+
   Future<Map<String, dynamic>> create({
     required String street,
     required String city,
@@ -93,6 +99,10 @@ class OrdersRepository {
       receiptNumber: json['receiptUrl'],
       checkoutSessionId: json['_id'],
       paymentStatus: json['payment']?['status'],
+      statusHistory: (json['statusHistory'] as List<dynamic>?)
+              ?.map((e) => OrderStatusEvent.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 

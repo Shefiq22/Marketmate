@@ -75,6 +75,15 @@ class ApiEndpoints {
   static const String myProfile = '$_v1/users/me';
   static const String deleteMe = '$_v1/users/me';
 
+  // Referrals
+  static const String referralsMe = '$_v1/referrals/me';
+
+  // Wallet
+  static const String walletMe = '$_v1/wallet/me';
+
+  // Orders — customer confirms delivery
+  static String orderCustomerComplete(String id) => '$_v1/orders/$id/customer-complete';
+
   // Analytics — Customer
   static const String analyticsDiscovery = '$_v1/analytics/discovery';
   static const String analyticsTopProducts = '$_v1/analytics/top-products';

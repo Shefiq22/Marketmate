@@ -265,6 +265,24 @@ class CartItem {
   };
 }
 
+class OrderStatusEvent {
+  final String status;
+  final String? note;
+  final String changedAt;
+
+  const OrderStatusEvent({
+    required this.status,
+    this.note,
+    required this.changedAt,
+  });
+
+  factory OrderStatusEvent.fromJson(Map<String, dynamic> json) => OrderStatusEvent(
+        status: json['status'] ?? '',
+        note: json['note'],
+        changedAt: json['changedAt'] ?? json['createdAt'] ?? '',
+      );
+}
+
 class Order {
   final String id;
   final String displayId;
@@ -278,6 +296,7 @@ class Order {
   final String? receiptNumber;
   final String? checkoutSessionId;
   final String? paymentStatus;
+  final List<OrderStatusEvent> statusHistory;
 
   const Order({
     required this.id,
@@ -292,6 +311,7 @@ class Order {
     this.receiptNumber,
     this.checkoutSessionId,
     this.paymentStatus,
+    this.statusHistory = const [],
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -313,6 +333,10 @@ class Order {
       receiptNumber: json['receiptNumber'],
       checkoutSessionId: json['checkoutSessionId'],
       paymentStatus: json['paymentStatus'],
+      statusHistory: (json['statusHistory'] as List<dynamic>?)
+              ?.map((e) => OrderStatusEvent.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 }

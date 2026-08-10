@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../models/models.dart';
 import '../../widgets/common_widgets.dart';
 import '../../providers/orders_provider.dart';
+import 'order_complete_screen.dart';
 import 'order_detail_screen.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
@@ -228,10 +229,19 @@ class _OrderCard extends StatelessWidget {
         : l10n.orders_status_completed;
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => OrderDetailScreen(order: order)),
-      ),
+      onTap: () {
+        if (orderAwaitsCustomerConfirmation(order.status)) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => OrderCompleteScreen(order: order)),
+          );
+          return;
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => OrderDetailScreen(order: order)),
+        );
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

@@ -13,6 +13,7 @@ import '../../theme/app_theme.dart';
 import '../../../../core/providers/theme_provider.dart';
 import 'address_book_screen.dart';
 import 'edit_profile_screen.dart';
+import 'referral_screen.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -258,6 +259,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => const SettingsScreen(),
+                              ),
+                            ),
+                          ),
+                          _MenuItem(
+                            icon: Icon(
+                              Icons.card_giftcard_outlined,
+                              size: w * 0.057,
+                              color: AppColors.grey600,
+                            ),
+                            label: 'Referrals & Wallet',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ReferralScreen(),
                               ),
                             ),
                           ),
