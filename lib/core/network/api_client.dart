@@ -22,6 +22,16 @@ class ApiClient {
   /// Refresh lock — prevents concurrent refresh calls.
   Completer<bool>? _refreshCompleter;
 
+  /// Invoked when a silent token refresh fails and the session can no longer
+  /// be restored. The app uses this to force a logout instead of hanging on
+  /// unauthenticated requests forever.
+  VoidCallback? onSessionExpired;
+
+  void _notifySessionExpired() {
+    debugPrint('[RefreshDebug] Session cannot be refreshed — notifying app to log out.');
+    onSessionExpired?.call();
+  }
+
   Future<void> init() async {
     // Primary: read from PrefsCache (fast, in-memory)
     final cache = PrefsCache();
@@ -48,11 +58,13 @@ class ApiClient {
 
   Future<void> setTokens(String access, String refresh) async {
     _accessToken = access;
-    _refreshToken = refresh;
+    if (refresh.isNotEmpty) {
+      _refreshToken = refresh;
+    }
     final cache = PrefsCache();
     await Future.wait([
       cache.setString(_tokenKey, access),
-      cache.setString(_refreshTokenKey, refresh),
+      if (refresh.isNotEmpty) cache.setString(_refreshTokenKey, refresh),
       cache.setString('auth_token', access),
     ]);
   }
@@ -137,8 +149,9 @@ class ApiClient {
     try {
       debugPrint('[RefreshDebug] Step 1: Refresh lifecycle initialized.');
 
-      if (_refreshToken == null) {
+      if (_refreshToken == null || _refreshToken!.isEmpty) {
         debugPrint('[RefreshDebug] ❌ No refresh token available — cannot refresh');
+        _notifySessionExpired();
         completer.complete(false);
         return null;
       }
@@ -173,7 +186,7 @@ class ApiClient {
       }
 
       debugPrint('[RefreshDebug] ❌ CRITICAL: Silent token refresh failed: status ${res.statusCode}');
-      await clearTokens();
+      _notifySessionExpired();
       completer.complete(false);
       return null;
     } catch (e) {
@@ -194,6 +207,7 @@ class ApiClient {
     required String path,
     String? body,
     required Map<String, String> headers,
+    int attempt = 0,
   }) async {
     Future<http.Response> _send() {
       switch (method) {
@@ -218,7 +232,7 @@ class ApiClient {
       if (responseData['message'] == 'Access token expired') {
         debugPrint('[RefreshDebug] Token expired detected. Fetching fresh session...');
         final newToken = await _handleTokenRefresh();
-        if (newToken != null) {
+        if (newToken != null && attempt < 1) {
           debugPrint('[RefreshDebug] Success! Re-injecting fresh token and retrying request.');
           final updatedHeaders = Map<String, String>.from(headers);
           updatedHeaders['Authorization'] = 'Bearer $newToken';
@@ -229,6 +243,7 @@ class ApiClient {
             path: path,
             body: body,
             headers: updatedHeaders,
+            attempt: attempt + 1,
           );
         }
         debugPrint('[RefreshDebug] ❌ Refresh failed — falling through to return original 401 error.');

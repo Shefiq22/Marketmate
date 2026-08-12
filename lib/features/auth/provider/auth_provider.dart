@@ -460,6 +460,17 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   @override
   Future<AuthState> build() async {
+    // When a silent token refresh fails, the session cannot be recovered. Log
+    // out so the user is routed to login instead of hanging on a dashboard
+    // that keeps hitting unauthenticated requests.
+    ApiClient().onSessionExpired = () {
+      Future.microtask(() async {
+        if (!ref.mounted) return;
+        debugPrint('[AuthNotifier] Session expired — logging out.');
+        await logout();
+      });
+    };
+
     final prefs = ref.read(sharedPreferencesProvider);
 
     final onboardingSeen = prefs.getBool(_onboardingKey) ?? false;

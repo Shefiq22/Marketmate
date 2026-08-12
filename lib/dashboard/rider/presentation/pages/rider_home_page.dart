@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -186,12 +188,12 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage>
                                   await ref
                                       .read(riderOnlineProvider.notifier)
                                       .toggle(v);
-                                } catch (_) {
+                                } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                          'Could not update your online status. Please try again.',
+                                          _onlineErrorMessage(e),
                                         ),
                                       ),
                                     );
@@ -323,6 +325,7 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage>
                   ),
                   SizedBox(height: size.height * 0.022),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Container(
@@ -467,18 +470,29 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage>
                               : AppColors.border,
                         ),
                       ),
-                      child: Text(
-                        hasData
-                            ? l10n.rider_no_active_deliveries
-                            : 'Tap ⊞ to simulate data',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: size.width * 0.036,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.gray2,
-                        ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.delivery_dining_outlined,
+                            size: size.width * 0.08,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.gray2,
+                          ),
+                          SizedBox(height: size.height * 0.01),
+                          Text(
+                            l10n.rider_no_active_deliveries,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: size.width * 0.036,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.gray2,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   else
@@ -612,6 +626,30 @@ class _RiderHomePageState extends ConsumerState<RiderHomePage>
         ),
       ),
     );
+  }
+
+  String _onlineErrorMessage(Object error) {
+    final text = error.toString().replaceFirst('Exception: ', '').toLowerCase();
+
+    if (text.contains('approved')) {
+      return 'Your rider account is awaiting admin approval. '
+          'You can go online once your account is approved.';
+    }
+    if (error is TimeoutException ||
+        error is SocketException ||
+        error is HttpException ||
+        text.contains('timed out') ||
+        text.contains('connection') ||
+        text.contains('internet') ||
+        text.contains('socket')) {
+      return 'No internet connection. Check your network and try again.';
+    }
+    if (text.contains('authentication required') ||
+        text.contains('log in') ||
+        text.contains('unauthor')) {
+      return 'Your session has expired. Please log in again.';
+    }
+    return 'Could not update your online status. Please try again.';
   }
 
   void _animateCameraTo(LatLng target) {
