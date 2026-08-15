@@ -28,12 +28,11 @@ final fcmInitializationProvider = FutureProvider<void>((ref) async {
     final token = await messaging.getToken();
     if (token != null) {
       ref.read(fcmTokenProvider.notifier).setToken(token);
-      _registerToken(token);
     }
 
     messaging.onTokenRefresh.listen((newToken) {
       ref.read(fcmTokenProvider.notifier).setToken(newToken);
-      _registerToken(newToken);
+      syncFcmTokenToProfile(newToken);
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -53,15 +52,24 @@ final fcmInitializationProvider = FutureProvider<void>((ref) async {
   }
 });
 
-void _registerToken(String token) async {
+/// Resolves the device's FCM push token, initializing Firebase Messaging
+/// first if needed. Returns `null` when the token is unavailable.
+Future<String?> getCurrentFcmToken(Ref ref) async {
+  await ref.read(fcmInitializationProvider.future);
+  return ref.read(fcmTokenProvider);
+}
+
+/// Sends the push token to the user's profile as `fcmToken` so the backend
+/// can deliver notifications to this device. Non-fatal on failure.
+Future<void> syncFcmTokenToProfile(String fcmToken) async {
   try {
-    await ApiClient().post(
-      ApiEndpoints.devicesRegister,
-      body: {'token': token, 'platform': 'android'},
+    await ApiClient().patch(
+      ApiEndpoints.myProfile,
+      body: {'fcmToken': fcmToken},
     );
-    debugPrint('[FCM] Token registered');
+    debugPrint('[FCM] Token synced to profile');
   } catch (e) {
-    debugPrint('[FCM] Token registration failed: $e');
+    debugPrint('[FCM] Token sync to profile failed: $e');
   }
 }
 

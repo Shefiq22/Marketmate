@@ -165,6 +165,19 @@ class AuthRepository {
     return null;
   }
 
+  /// Persists the device's FCM push token on the user's profile
+  /// (`PATCH /api/v1/users/me`) so the backend can deliver push
+  /// notifications to this device.
+  Future<void> updateFcmToken(String fcmToken) async {
+    final res = await _client.patch(
+      ApiEndpoints.myProfile,
+      body: {'fcmToken': fcmToken},
+    );
+    if (!res.success) {
+      throw AuthException(res.message, statusCode: res.statusCode);
+    }
+  }
+
   bool get isAuthenticated => _client.isAuthenticated;
 }
 

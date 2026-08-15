@@ -13,6 +13,7 @@ import 'package:market_mate/dashboard/seller/providers/seller_state_providers.da
 import '../data/auth_repository.dart';
 import 'auth_state.dart';
 import 'pending_verification_provider.dart';
+import '../../chat/providers/fcm_provider.dart';
 
 bool isUnverifiedAccountMessage(String message) {
   final lower = message.toLowerCase();
@@ -541,6 +542,27 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     ref.invalidate(bestSellersProvider);
 
     state = AsyncData(_roleToState(role));
+
+    // After a successful login, persist this device's FCM push token on the
+    // user's profile so the backend can deliver notifications. This is
+    // fire-and-forget so it never delays the login flow.
+    unawaited(_syncFcmToken());
+  }
+
+  /// Sends the current device's FCM push token to the profile endpoint as
+  /// `fcmToken`. Fails silently so push setup never breaks authentication.
+  Future<void> _syncFcmToken() async {
+    try {
+      final fcmToken = await getCurrentFcmToken(ref);
+      if (fcmToken == null || fcmToken.isEmpty) {
+        debugPrint('[Auth] No FCM token available to sync.');
+        return;
+      }
+      await syncFcmTokenToProfile(fcmToken);
+      debugPrint('[Auth] FCM token synced after login.');
+    } catch (e) {
+      debugPrint('[Auth] FCM token sync failed: $e');
+    }
   }
 
   Future<void> logout() async {
