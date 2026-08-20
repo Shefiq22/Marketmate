@@ -92,6 +92,25 @@ class AuthRepository {
     return data;
   }
 
+  /// Authenticates via a third-party provider (Google, Apple, Facebook, etc.)
+  /// by sending the Firebase ID Token to the backend. The backend verifies the
+  /// token with Firebase Admin SDK and returns MarketMate session JWTs.
+  Future<Map<String, dynamic>> socialLogin({
+    required String idToken,
+    required String role,
+  }) async {
+    final res = await _client.post(ApiEndpoints.socialLogin, body: {
+      'idToken': idToken,
+      'role': role,
+    });
+    if (!res.success) {
+      throw AuthException(res.message, statusCode: res.statusCode);
+    }
+    final data = res.data as Map<String, dynamic>;
+    await _extractAndSetTokens(data);
+    return data;
+  }
+
   /// Tries keys [accessToken], [token], [access_token] in that order.
   Future<void> _extractAndSetTokens(Map<String, dynamic> data) async {
     final tokens = data['tokens'] ?? data;

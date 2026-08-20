@@ -8,6 +8,7 @@ class ApiEndpoints {
   static const String verifyEmail = '$_v1/auth/verify-email';
   static const String verifyPhone = '$_v1/auth/verify-phone';
   static const String login = '$_v1/auth/login';
+  static const String socialLogin = '$_v1/auth/social-login';
   static const String logout = '$_v1/auth/logout';
   static const String refreshToken = '$_v1/auth/refresh-token';
   static const String forgotPassword = '$_v1/auth/forgot-password';

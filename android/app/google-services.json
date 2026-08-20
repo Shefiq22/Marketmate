@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "625090928857",
+    "project_id": "marketmate-dd415",
+    "storage_bucket": "marketmate-dd415.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:625090928857:android:0343e87b1ecf468243dec8",
+        "android_client_info": {
+          "package_name": "com.marketmateconnectltd.market_mate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvx9JpJfElyQX5PkV8lotBKCzP_KFGzJw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "625090928857-h2jjc9a92ja25joii3lenhfou89mk41s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.toyinnn.marketmate"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:625090928857:android:b11231b7fdd2bcfa43dec8",
+        "android_client_info": {
+          "package_name": "com.toyinnn.marketmate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvx9JpJfElyQX5PkV8lotBKCzP_KFGzJw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "625090928857-h2jjc9a92ja25joii3lenhfou89mk41s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.toyinnn.marketmate"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

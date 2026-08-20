@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/api_client.dart';
@@ -25,6 +26,9 @@ import 'l10n/app_localizations.dart' as loc;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase (required for Firebase Auth and Cloud Messaging).
+  await Firebase.initializeApp();
 
   // Transparent status bar so backgrounds bleed edge-to-edge
   SystemChrome.setSystemUIOverlayStyle(
