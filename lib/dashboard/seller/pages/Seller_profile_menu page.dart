@@ -13,6 +13,7 @@ import 'seller_help_support_page.dart';
 import 'seller_settings_page.dart';
 import 'sellers_messages_page.dart';
 import 'seller_alert_preferences_page.dart';
+import 'package:market_mate/dashboard/buyer/screens/profile/referral_screen.dart';
 
 class SellerProfileMenuPage extends ConsumerWidget {
   const SellerProfileMenuPage({super.key});
@@ -133,6 +134,16 @@ class SellerProfileMenuPage extends ConsumerWidget {
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => const SellerEarningsPage(),
+                            ),
+                          ),
+                        ),
+                          _SMenuTile(
+                          materialIcon: Icons.card_giftcard_outlined,
+                          label: 'Referrals & Wallet',
+                          isTablet: isTablet,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ReferralScreen(),
                             ),
                           ),
                         ),
@@ -340,7 +351,8 @@ class SellerProfileMenuPage extends ConsumerWidget {
 }
 
 class _SMenuTile extends StatelessWidget {
-  final String iconAsset;
+  final String? iconAsset;
+  final IconData? materialIcon;
   final String label;
   final bool isTablet;
   final VoidCallback onTap;
@@ -348,13 +360,14 @@ class _SMenuTile extends StatelessWidget {
   final Color? textColor;
 
   const _SMenuTile({
-    required this.iconAsset,
+    this.iconAsset,
+    this.materialIcon,
     required this.label,
     required this.isTablet,
     required this.onTap,
     this.iconColor,
     this.textColor,
-  });
+  }) : assert(iconAsset != null || materialIcon != null);
 
   @override
   Widget build(BuildContext context) {
@@ -376,15 +389,22 @@ class _SMenuTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset(
-              iconAsset,
-              width: isTablet ? 26 : size.width * 0.06,
-              height: isTablet ? 26 : size.width * 0.06,
-              colorFilter: ColorFilter.mode(
-                effectiveIconColor,
-                BlendMode.srcIn,
+            if (materialIcon != null)
+              Icon(
+                materialIcon,
+                size: isTablet ? 26 : size.width * 0.06,
+                color: effectiveIconColor,
+              )
+            else
+              SvgPicture.asset(
+                iconAsset!,
+                width: isTablet ? 26 : size.width * 0.06,
+                height: isTablet ? 26 : size.width * 0.06,
+                colorFilter: ColorFilter.mode(
+                  effectiveIconColor,
+                  BlendMode.srcIn,
+                ),
               ),
-            ),
             SizedBox(width: size.width * 0.04),
             Expanded(
               child: Text(
