@@ -303,6 +303,8 @@ class RegisterFormNotifier extends StateNotifier<RegisterFormState> {
       state = state.copyWith(referralCode: v, error: null);
   void togglePassword() =>
       state = state.copyWith(passwordVisible: !state.passwordVisible);
+  void setError(String message) =>
+      state = state.copyWith(error: message);
 
   Future<String?> register() async {
     state = state.copyWith(isLoading: true, error: null);

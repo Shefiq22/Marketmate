@@ -23,7 +23,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
   bool _isVerifying = false;
-  bool _socialLoading = false;
+  String? _loadingProvider;
   final _socialAuthService = SocialAuthService();
 
   @override
@@ -193,14 +193,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _signInWithGoogle() async {
-    if (_socialLoading) return;
-    setState(() => _socialLoading = true);
+    if (_loadingProvider != null) return;
+    setState(() => _loadingProvider = 'google');
 
     try {
       final idToken = await _socialAuthService.signInWithGoogle();
       if (!mounted) return;
       if (idToken == null) {
-        setState(() => _socialLoading = false);
+        setState(() => _loadingProvider = null);
         return;
       }
 
@@ -216,7 +216,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final notifier = ref.read(loginFormProvider.notifier);
       notifier.setError('Google sign-in failed. Please try again.');
     } finally {
-      if (mounted) setState(() => _socialLoading = false);
+      if (mounted) setState(() => _loadingProvider = null);
     }
   }
 
@@ -224,14 +224,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   // "Sign in with Apple" capability is added in Xcode.
   // ignore: unused_element
   Future<void> _signInWithApple() async {
-    if (_socialLoading) return;
-    setState(() => _socialLoading = true);
+    if (_loadingProvider != null) return;
+    setState(() => _loadingProvider = 'apple');
 
     try {
       final idToken = await _socialAuthService.signInWithApple();
       if (!mounted) return;
       if (idToken == null) {
-        setState(() => _socialLoading = false);
+        setState(() => _loadingProvider = null);
         return;
       }
 
@@ -245,19 +245,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError('Apple sign-in failed. Please try again.');
     } finally {
-      if (mounted) setState(() => _socialLoading = false);
+      if (mounted) setState(() => _loadingProvider = null);
     }
   }
 
   Future<void> _signInWithFacebook() async {
-    if (_socialLoading) return;
-    setState(() => _socialLoading = true);
+    if (_loadingProvider != null) return;
+    setState(() => _loadingProvider = 'facebook');
 
     try {
       final idToken = await _socialAuthService.signInWithFacebook();
       if (!mounted) return;
       if (idToken == null) {
-        setState(() => _socialLoading = false);
+        setState(() => _loadingProvider = null);
         return;
       }
 
@@ -271,7 +271,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError('Facebook sign-in failed. Please try again.');
     } finally {
-      if (mounted) setState(() => _socialLoading = false);
+      if (mounted) setState(() => _loadingProvider = null);
     }
   }
 
@@ -647,13 +647,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   _SocialButton(
                     icon: 'assets/icons/google.png',
                     onTap: _signInWithGoogle,
-                    loading: _socialLoading,
+                    loading: _loadingProvider == 'google',
                   ),
                   const SizedBox(width: 12),
                   _SocialButton(
                     icon: 'assets/icons/facebook.png',
                     onTap: _signInWithFacebook,
-                    loading: _socialLoading,
+                    loading: _loadingProvider == 'facebook',
                   ),
                 ],
               ),
@@ -669,7 +669,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           width: double.infinity,
           height: isTablet ? 64 : 56,
           child: ElevatedButton(
-            onPressed: form.isValid && !form.isLoading && !_socialLoading
+            onPressed: form.isValid && !form.isLoading && _loadingProvider == null
                 ? () async {
                     try {
                       final repo = ref.read(authRepositoryProvider);

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:market_mate/features/auth/data/auth_repository.dart';
+import 'package:market_mate/features/auth/data/social_auth_service.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
+import 'package:market_mate/features/auth/provider/current_user_provider.dart';
 import 'package:market_mate/features/auth/provider/pending_verification_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'login_page.dart';
@@ -24,6 +27,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   bool _passwordTouched = false;
   bool _emailTouched = false;
   bool _phoneTouched = false;
+  String? _loadingProvider;
+  final _socialAuthService = SocialAuthService();
 
   bool _hasUpper(String v) => v.contains(RegExp(r'[A-Z]'));
   bool _hasLower(String v) => v.contains(RegExp(r'[a-z]'));
@@ -47,6 +52,144 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       r'^[\w.+\-]+@(gmail|yahoo|outlook|hotmail|icloud|me|live|protonmail|zoho|yandex|aol|msn|([a-zA-Z0-9\-]+\.[a-zA-Z]{2,}))\.[a-zA-Z]{2,}$',
     );
     return emailRegex.hasMatch(v.trim());
+  }
+
+  Future<void> _handleSocialLoginSuccess(
+    Map<String, dynamic> data, {
+    String? socialEmail,
+  }) async {
+    if (!mounted) return;
+
+    final tokens = data['tokens'] as Map<String, dynamic>?;
+    final accessToken = tokens?['accessToken'] as String? ?? data['accessToken'] as String?;
+    Map<String, dynamic>? apiUser;
+    if (data['user'] is Map<String, dynamic>) {
+      apiUser = data['user'] as Map<String, dynamic>?;
+    } else if (data['profile'] is Map<String, dynamic>) {
+      apiUser = data['profile'] as Map<String, dynamic>?;
+    } else if (data['account'] is Map<String, dynamic>) {
+      apiUser = data['account'] as Map<String, dynamic>?;
+    }
+
+    if (accessToken != null) {
+      final repo = ref.read(authRepositoryProvider);
+      await repo.setTokens(accessToken, '');
+    }
+
+    String? roleStr;
+    String? nameStr;
+    String? emailStr;
+    String? phoneStr;
+    String? userIdStr;
+
+    if (accessToken != null) {
+      final jwtUser = decodeUserFromJwt(accessToken);
+      if (jwtUser != null) {
+        roleStr = jwtUser.role.isNotEmpty ? jwtUser.role : null;
+        nameStr = jwtUser.name.isNotEmpty ? jwtUser.name : null;
+        emailStr = jwtUser.email.isNotEmpty ? jwtUser.email : null;
+        phoneStr = jwtUser.phone.isNotEmpty ? jwtUser.phone : null;
+        userIdStr = jwtUser.userId.isNotEmpty ? jwtUser.userId : null;
+      }
+    }
+
+    roleStr ??= apiUser?['role'] as String?;
+    nameStr ??= apiUser?['name'] as String?;
+    nameStr ??= apiUser?['fullName'] as String?;
+    nameStr ??= apiUser?['full_name'] as String?;
+    nameStr ??= apiUser?['displayName'] as String?;
+    nameStr ??= apiUser?['username'] as String?;
+    emailStr ??= apiUser?['email'] as String? ?? socialEmail;
+    phoneStr ??= apiUser?['phone'] as String?;
+    userIdStr ??= (apiUser?['_id'] ?? apiUser?['id'] ?? apiUser?['userId']) as String?;
+
+    roleStr ??= data['role'] as String?;
+    nameStr ??= data['name'] as String?;
+    emailStr ??= data['email'] as String?;
+    phoneStr ??= data['phone'] as String?;
+    userIdStr ??= (data['id'] ?? data['_id'] ?? data['userId']) as String?;
+
+    await ref.read(currentUserProvider.notifier).update(
+      name: nameStr,
+      email: emailStr,
+      phone: phoneStr,
+      role: roleStr,
+      userId: userIdStr,
+    );
+
+    await ref.read(currentUserProvider.notifier).refreshFromToken();
+
+    final resolvedRole = roleStr ?? 'customer';
+    ref.read(activeRoleProvider.notifier).state = apiToUserRole(resolvedRole);
+    await ref.read(authProvider.notifier).authenticate(resolvedRole);
+
+    if (!mounted) return;
+    TextInput.finishAutofillContext();
+    widget.onNext();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_loadingProvider != null) return;
+    setState(() => _loadingProvider = 'google');
+
+    try {
+      final idToken = await _socialAuthService.signInWithGoogle();
+      if (!mounted) return;
+      if (idToken == null) {
+        setState(() => _loadingProvider = null);
+        return;
+      }
+
+      final repo = ref.read(authRepositoryProvider);
+      final selectedRole = ref.read(selectedRoleProvider);
+      final roleStr = selectedRole == UserRole.rider
+          ? 'rider'
+          : selectedRole == UserRole.farmerOrWholesaler
+              ? 'seller'
+              : 'customer';
+      final data = await repo.socialLogin(idToken: idToken, role: roleStr);
+      await _handleSocialLoginSuccess(data);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ref.read(registerFormProvider.notifier).setError(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      ref.read(registerFormProvider.notifier).setError('Google sign-in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _loadingProvider = null);
+    }
+  }
+
+  Future<void> _signInWithFacebook() async {
+    if (_loadingProvider != null) return;
+    setState(() => _loadingProvider = 'facebook');
+
+    try {
+      final idToken = await _socialAuthService.signInWithFacebook();
+      if (!mounted) return;
+      if (idToken == null) {
+        setState(() => _loadingProvider = null);
+        return;
+      }
+
+      final repo = ref.read(authRepositoryProvider);
+      final selectedRole = ref.read(selectedRoleProvider);
+      final roleStr = selectedRole == UserRole.rider
+          ? 'rider'
+          : selectedRole == UserRole.farmerOrWholesaler
+              ? 'seller'
+              : 'customer';
+      final data = await repo.socialLogin(idToken: idToken, role: roleStr);
+      await _handleSocialLoginSuccess(data);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ref.read(registerFormProvider.notifier).setError(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      ref.read(registerFormProvider.notifier).setError('Facebook sign-in failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _loadingProvider = null);
+    }
   }
 
   @override
@@ -517,21 +660,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     Expanded(
                       child: _SocialButton(
                         icon: 'assets/icons/google.png',
-                        onTap: () {},
+                        onTap: _signInWithGoogle,
+                        loading: _loadingProvider == 'google',
                       ),
                     ),
                     SizedBox(width: size.width * 0.032),
                     Expanded(
                       child: _SocialButton(
                         icon: 'assets/icons/facebook.png',
-                        onTap: () {},
-                      ),
-                    ),
-                    SizedBox(width: size.width * 0.032),
-                    Expanded(
-                      child: _SocialButton(
-                        icon: 'assets/icons/apple.png',
-                        onTap: () {},
+                        onTap: _signInWithFacebook,
+                        loading: _loadingProvider == 'facebook',
                       ),
                     ),
                   ],
@@ -643,8 +781,9 @@ class _PasswordRequirementLine extends StatelessWidget {
 class _SocialButton extends StatelessWidget {
   final String icon;
   final VoidCallback onTap;
+  final bool loading;
 
-  const _SocialButton({required this.icon, required this.onTap});
+  const _SocialButton({required this.icon, required this.onTap, this.loading = false});
 
   @override
   Widget build(BuildContext context) {
@@ -653,7 +792,7 @@ class _SocialButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: loading ? null : onTap,
       child: Container(
         height: isTablet ? size.height * 0.08 : size.height * 0.072,
         decoration: BoxDecoration(
@@ -665,14 +804,23 @@ class _SocialButton extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Image.asset(
-            icon,
-            width: isTablet ? 28 : 24,
-            height: isTablet ? 28 : 24,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const SizedBox.shrink(),
-          ),
+          child: loading
+              ? SizedBox(
+                  width: isTablet ? 22 : 20,
+                  height: isTablet ? 22 : 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.black,
+                  ),
+                )
+              : Image.asset(
+                  icon,
+                  width: isTablet ? 28 : 24,
+                  height: isTablet ? 28 : 24,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
+                ),
         ),
       ),
     );
