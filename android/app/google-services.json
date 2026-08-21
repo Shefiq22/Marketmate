@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "625090928857-mco9ng2d3ll372jn17va8v11qqro4h7m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.marketmateconnectltd.market_mate",
+            "certificate_hash": "a133f55dc4ff1c7c5448c6b973f10559f309f848"
+          }
+        },
+        {
           "client_id": "625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com",
           "client_type": 3
         }

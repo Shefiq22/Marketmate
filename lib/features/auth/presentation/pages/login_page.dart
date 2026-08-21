@@ -220,8 +220,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else {
         notifier.setError('Google sign-in failed. Please try again.');
       }
-    } catch (e) {
+    } catch (e, st) {
       if (!mounted) return;
+      debugPrint('[SocialLogin] Google login error: $e');
+      debugPrint('[SocialLogin] Stack: $st');
       final notifier = ref.read(loginFormProvider.notifier);
       notifier.setError('Google sign-in failed. Please try again.');
     } finally {
@@ -250,8 +252,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } on AuthException catch (e) {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError(e.message);
-    } catch (e) {
+    } catch (e, st) {
       if (!mounted) return;
+      debugPrint('[SocialLogin] Apple login error: $e');
+      debugPrint('[SocialLogin] Stack: $st');
       ref.read(loginFormProvider.notifier).setError('Apple sign-in failed. Please try again.');
     } finally {
       if (mounted) setState(() => _loadingProvider = null);
@@ -276,16 +280,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } on AuthException catch (e) {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError(e.message);
-    } on FirebaseAuthException catch (e) {
+    } catch (e, st) {
       if (!mounted) return;
-      final notifier = ref.read(loginFormProvider.notifier);
-      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
-        notifier.setError('No account found with these credentials. Please sign up first.');
-      } else {
-        notifier.setError('Facebook sign-in failed. Please try again.');
-      }
-    } catch (e) {
-      if (!mounted) return;
+      debugPrint('[SocialLogin] Facebook login error: $e');
+      debugPrint('[SocialLogin] Stack: $st');
       ref.read(loginFormProvider.notifier).setError('Facebook sign-in failed. Please try again.');
     } finally {
       if (mounted) setState(() => _loadingProvider = null);
