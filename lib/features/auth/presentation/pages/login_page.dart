@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuthException;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -211,6 +212,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!mounted) return;
       final notifier = ref.read(loginFormProvider.notifier);
       notifier.setError(e.message);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final notifier = ref.read(loginFormProvider.notifier);
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        notifier.setError('No account found with these credentials. Please sign up first.');
+      } else {
+        notifier.setError('Google sign-in failed. Please try again.');
+      }
     } catch (e) {
       if (!mounted) return;
       final notifier = ref.read(loginFormProvider.notifier);
@@ -267,6 +276,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } on AuthException catch (e) {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError(e.message);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final notifier = ref.read(loginFormProvider.notifier);
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        notifier.setError('No account found with these credentials. Please sign up first.');
+      } else {
+        notifier.setError('Facebook sign-in failed. Please try again.');
+      }
     } catch (e) {
       if (!mounted) return;
       ref.read(loginFormProvider.notifier).setError('Facebook sign-in failed. Please try again.');
@@ -358,13 +375,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.fromLTRB(16.0, size.height * 0.04, 16.0, size.height * 0.03),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
               if (canPop)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
+                  padding: EdgeInsets.only(bottom: size.height * 0.03),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: SizedBox(

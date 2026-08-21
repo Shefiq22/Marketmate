@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuthException;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -152,6 +153,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     } on AuthException catch (e) {
       if (!mounted) return;
       ref.read(registerFormProvider.notifier).setError(e.message);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final notifier = ref.read(registerFormProvider.notifier);
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        notifier.setError('No account found with these credentials. Please sign up first.');
+      } else {
+        notifier.setError('Google sign-in failed. Please try again.');
+      }
     } catch (e) {
       if (!mounted) return;
       ref.read(registerFormProvider.notifier).setError('Google sign-in failed. Please try again.');
@@ -184,6 +193,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     } on AuthException catch (e) {
       if (!mounted) return;
       ref.read(registerFormProvider.notifier).setError(e.message);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final notifier = ref.read(registerFormProvider.notifier);
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        notifier.setError('No account found with these credentials. Please sign up first.');
+      } else {
+        notifier.setError('Facebook sign-in failed. Please try again.');
+      }
     } catch (e) {
       if (!mounted) return;
       ref.read(registerFormProvider.notifier).setError('Facebook sign-in failed. Please try again.');
@@ -794,7 +811,7 @@ class _SocialButton extends StatelessWidget {
     return GestureDetector(
       onTap: loading ? null : onTap,
       child: Container(
-        height: isTablet ? size.height * 0.08 : size.height * 0.072,
+        height: isTablet ? 60 : 54,
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : AppColors.white,
           borderRadius: BorderRadius.circular(12),

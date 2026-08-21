@@ -13,7 +13,10 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 /// 3. Sign in to Firebase Auth with that credential.
 /// 4. Return the Firebase ID Token for the backend to verify.
 class SocialAuthService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    serverClientId: '625090928857-abvrhquq5r3gohbqhs00rn88ud8g3fbo.apps.googleusercontent.com',
+  );
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   // ─────────────── Google ───────────────
