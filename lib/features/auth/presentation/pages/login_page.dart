@@ -681,7 +681,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ),
     ),
     bottomNavigationBar: Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, MediaQuery.of(context).padding.bottom + 4.0),
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, MediaQuery.of(context).padding.bottom + 12.0),
         child: SizedBox(
           width: double.infinity,
           height: isTablet ? 64 : 56,
