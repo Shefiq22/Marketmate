@@ -12,6 +12,7 @@ import 'package:market_mate/dashboard/buyer/providers/products_provider.dart';
 import 'package:market_mate/dashboard/seller/providers/seller_state_providers.dart';
 import '../data/auth_repository.dart';
 import 'auth_state.dart';
+import 'current_user_provider.dart';
 import 'pending_verification_provider.dart';
 import '../../chat/providers/fcm_provider.dart';
 
@@ -460,6 +461,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   static const _roleKey = 'user_role';
   static const _onboardingKey = 'onboarding_seen';
   static const _pendingUserIdKey = 'pending_user_id';
+  static const _needsPhoneKey = 'needs_phone_update';
 
   @override
   Future<AuthState> build() async {
@@ -481,6 +483,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     final token = prefs.getString(_tokenKey);
     if (token != null && token.isNotEmpty) {
+      // Users parked on the mandatory phone-number step resume there after a
+      // restart instead of landing on the dashboard without a phone number.
+      if (prefs.getBool(_needsPhoneKey) ?? false) {
+        return AuthNeedsProfileUpdate();
+      }
       final role = prefs.getString(_roleKey) ?? '';
       return _roleToState(role);
     }
@@ -532,6 +539,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     }
     await prefs.setString(_roleKey, role);
 
+    // First-time social sign-ups have no phone number on file yet. Park them
+    // on the Update Profile screen until they add one; everyone else goes
+    // straight to their dashboard.
+    final needsPhone =
+        ref.read(currentUserProvider)?.phone.trim().isEmpty ?? true;
+    await prefs.setBool(_needsPhoneKey, needsPhone);
+
     // Invalidate all cached providers to force fresh fetches with the new token.
     // This prevents stale "sold out" data from a previous session.
     ref.invalidate(productsProvider);
@@ -543,11 +557,36 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     ref.invalidate(sellerEarningsProvider);
     ref.invalidate(bestSellersProvider);
 
-    state = AsyncData(_roleToState(role));
+    state = AsyncData(
+      needsPhone ? const AuthNeedsProfileUpdate() : _roleToState(role),
+    );
 
     // After a successful login, persist this device's FCM push token on the
     // user's profile so the backend can deliver notifications. This is
     // fire-and-forget so it never delays the login flow.
+    unawaited(_syncFcmToken());
+  }
+
+  /// Whether the signed-in user still owes us a phone number and must be
+  /// routed through the [UpdateProfileScreen].
+  bool needsProfileUpdate() {
+    return ref.read(sharedPreferencesProvider).getBool(_needsPhoneKey) ?? false;
+  }
+
+  /// Called by the Update Profile screen once a phone number is saved.
+  /// Clears the gate and continues into the dashboard for the stored role.
+  Future<void> completeProfileUpdate() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_needsPhoneKey, false);
+    final role = prefs.getString(_roleKey) ?? 'customer';
+    ref.read(activeRoleProvider.notifier).state = apiToUserRole(role);
+
+    ref.invalidate(productsProvider);
+    ref.invalidate(productsByCategoryProvider);
+    ref.invalidate(vendorsProvider);
+
+    state = AsyncData(_roleToState(role));
+
     unawaited(_syncFcmToken());
   }
 
@@ -575,6 +614,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         prefs.remove(_roleKey),
         prefs.remove(_pendingUserIdKey),
         prefs.remove('pending_email'),
+        prefs.remove(_needsPhoneKey),
         PrefsCache().remove('current_user'),
       ]);
       await ApiClient().clearTokens();

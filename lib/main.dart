@@ -19,6 +19,7 @@ import 'dashboard/buyer/theme/app_theme.dart' as buyer;
 import 'dashboard/presentation/pages/dashboard_router.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/questionnaire_screen.dart';
+import 'features/auth/presentation/pages/update_profile_screen.dart';
 import 'features/auth/provider/auth_provider.dart';
 import 'features/auth/provider/auth_state.dart';
 import 'features/onboarding/presentation/pages/onboarding_screen.dart';
@@ -111,6 +112,7 @@ class AuthGate extends ConsumerWidget {
         AuthOnboarding() => const OnboardingScreen(),
         AuthUnauthenticated() => const LoginPage(),
         AuthPendingVerification() => const QuestionnaireScreen(),
+        AuthNeedsProfileUpdate() => const UpdateProfileScreen(),
         AuthBuyer() => const DashboardRouter(),
         AuthSeller() => const DashboardRouter(),
         AuthRider() => const DashboardRouter(),

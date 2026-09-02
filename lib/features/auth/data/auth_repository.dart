@@ -197,6 +197,20 @@ class AuthRepository {
     }
   }
 
+  /// Updates profile fields (`PATCH /api/v1/users/me`). Returns the phone
+  /// number normalized to international format (+234…) so callers can mirror
+  /// what the backend stores.
+  Future<String> updateProfile({String? phone}) async {
+    final formatted = phone != null ? _formatPhone(phone) : null;
+    final res = await _client.patch(ApiEndpoints.myProfile, body: {
+      if (formatted != null) 'phone': formatted,
+    });
+    if (!res.success) {
+      throw AuthException(res.message, statusCode: res.statusCode);
+    }
+    return formatted ?? '';
+  }
+
   bool get isAuthenticated => _client.isAuthenticated;
 }
 

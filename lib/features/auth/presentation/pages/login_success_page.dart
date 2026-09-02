@@ -5,6 +5,7 @@ import 'package:market_mate/dashboard/presentation/pages/dashboard_router.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import 'package:market_mate/features/auth/provider/current_user_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'update_profile_screen.dart';
 
 class LoginSuccessPage extends ConsumerStatefulWidget {
   const LoginSuccessPage({super.key});
@@ -96,8 +97,14 @@ class _LoginSuccessPageState extends ConsumerState<LoginSuccessPage>
     ref.read(activeRoleProvider.notifier).state = role;
 
     if (!mounted) return;
+    // Accounts without a phone number on file must complete their profile
+    // before they can reach the dashboard.
+    final needsProfile = ref.read(authProvider.notifier).needsProfileUpdate();
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const DashboardRouter()),
+      MaterialPageRoute(
+        builder: (_) =>
+            needsProfile ? const UpdateProfileScreen() : const DashboardRouter(),
+      ),
       (route) => false,
     );
   }

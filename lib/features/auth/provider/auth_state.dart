@@ -14,6 +14,12 @@ class AuthPendingVerification extends AuthState {
   const AuthPendingVerification();
 }
 
+/// The account is authenticated but has no phone number on file yet.
+/// Routed to the mandatory Update Profile screen until one is saved.
+class AuthNeedsProfileUpdate extends AuthState {
+  const AuthNeedsProfileUpdate();
+}
+
 class AuthBuyer extends AuthState {
   const AuthBuyer();
 }

@@ -4,6 +4,7 @@ import 'package:market_mate/core/widgets/sandy_loader.dart';
 import 'package:market_mate/dashboard/presentation/pages/dashboard_router.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'update_profile_screen.dart';
 
 class RegistrationSuccessPage extends ConsumerStatefulWidget {
   const RegistrationSuccessPage({super.key});
@@ -88,8 +89,14 @@ class _RegistrationSuccessPageState
         selected ?? UserRole.retailerOrConsumer;
 
     if (!mounted) return;
+    // Accounts without a phone number on file must complete their profile
+    // before they can reach the dashboard.
+    final needsProfile = ref.read(authProvider.notifier).needsProfileUpdate();
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const DashboardRouter()),
+      MaterialPageRoute(
+        builder: (_) =>
+            needsProfile ? const UpdateProfileScreen() : const DashboardRouter(),
+      ),
       (route) => false,
     );
   }
