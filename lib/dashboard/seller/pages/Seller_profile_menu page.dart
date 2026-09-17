@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import 'package:market_mate/core/theme/app_colors.dart';
+import 'package:market_mate/core/network/api_client.dart';
 import 'package:market_mate/core/providers/theme_provider.dart';
 import 'package:market_mate/features/auth/presentation/pages/login_page.dart';
 import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import 'package:market_mate/features/auth/provider/current_user_provider.dart';
+import 'package:market_mate/dashboard/buyer/theme/buyer_layout.dart';
+import 'package:market_mate/dashboard/buyer/theme/app_theme.dart' as buyer;
 import 'seller_profile_page.dart';
 import 'seller_earnings_page.dart';
 import 'seller_help_support_page.dart';
@@ -29,223 +32,245 @@ class SellerProfileMenuPage extends ConsumerWidget {
       backgroundColor: isDark
           ? AppColors.scaffoldDark
           : AppColors.scaffoldLight,
-
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(size.width * 0.04),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(size.width * 0.04),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.cardDark : AppColors.white,
-                      borderRadius: BorderRadius.circular(size.width * 0.043),
-                      border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.border,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: size.width * 0.147,
-                          height: size.width * 0.147,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primarySurface,
-                            border: Border.all(
-                              color: AppColors.sellerAccent,
-                              width: 2,
+            child: RefreshIndicator(
+              onRefresh: () => _refreshProfile(context, ref),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: BuyerLayout.screenInsets(
+                  bottom: BuyerLayout.bottomNavClearance,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(BuyerLayout.cardPadding),
+                      decoration: BuyerLayout.cardDecoration(context),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: buyer.AppColors.primaryBg,
+                              border: Border.all(
+                                color: AppColors.sellerAccent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                user?.initial ?? 'S',
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.sellerAccent,
+                                ),
+                              ),
                             ),
                           ),
-                          child: Center(
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user?.name.isNotEmpty == true
+                                      ? user!.name
+                                      : 'Seller',
+                                  style: TextStyle(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.2,
+                                    color: isDark
+                                        ? buyer.AppColors.darkText
+                                        : buyer.AppColors.text,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  user?.email ?? 'seller@marketmate.app',
+                                  style: TextStyle(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 13,
+                                    color: isDark
+                                        ? buyer.AppColors.darkTextSecondary
+                                        : buyer.AppColors.grey500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: buyer.AppColors.primaryBg,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             child: Text(
-                              user?.initial ?? 'S',
-                              style: TextStyle(
-                                fontSize: size.width * 0.047,
-                                fontWeight: FontWeight.w700,
+                              user?.role.replaceAll('_', ' ') ?? '',
+                              style: const TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.sellerAccent,
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: size.width * 0.035),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user?.name.isNotEmpty == true
-                                    ? user!.name
-                                    : 'Seller',
-                                style: TextStyle(
-                                  fontSize: size.width * 0.043,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: BuyerLayout.sectionGap),
+
+                    Container(
+                      decoration: BuyerLayout.cardDecoration(context),
+                      child: Column(
+                        children: [
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/profile_icon.svg',
+                            label:
+                                AppLocalizations.of(context)!.menu_profile_label,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SellerProfilePage(),
                               ),
-                              SizedBox(height: size.height * 0.004),
-                              Text(
-                                user?.email ?? 'seller@marketmate.app',
-                                style: TextStyle(
-                                  fontSize: size.width * 0.035,
-                                  color: isDark
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.gray2,
-                                ),
+                            ),
+                          ),
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/earnings_icon.svg',
+                            label: AppLocalizations.of(context)!.menu_earnings,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SellerEarningsPage(),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: size.height * 0.021),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.cardDark : AppColors.white,
-                      borderRadius: BorderRadius.circular(size.width * 0.043),
-                      border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.border,
+                          _SMenuTile(
+                            materialIcon: Icons.card_giftcard_outlined,
+                            label: 'Referrals & Wallet',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const ReferralScreen(),
+                              ),
+                            ),
+                          ),
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/messages.svg',
+                            label: AppLocalizations.of(context)!.menu_messages,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SellerMessagesPage(),
+                              ),
+                            ),
+                          ),
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/notification_icon.svg',
+                            label: AppLocalizations.of(
+                              context,
+                            )!.menu_alert_preferences,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    const SellerAlertPreferencesPage(),
+                              ),
+                            ),
+                          ),
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/Question.svg',
+                            label:
+                                AppLocalizations.of(context)!.menu_help_support,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SellerHelpSupportPage(),
+                              ),
+                            ),
+                          ),
+                          _SMenuTile(
+                            iconAsset: 'assets/icons/setting.svg',
+                            label:
+                                AppLocalizations.of(context)!.menu_settings_label,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SellerSettingsPage(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      children: [
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/profile_icon.svg',
-                          label: AppLocalizations.of(context)!.menu_profile_label,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SellerProfilePage(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/earnings_icon.svg',
-                          label: AppLocalizations.of(context)!.menu_earnings,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SellerEarningsPage(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          materialIcon: Icons.card_giftcard_outlined,
-                          label: 'Referrals & Wallet',
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ReferralScreen(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/messages.svg',
-                          label: AppLocalizations.of(context)!.menu_messages,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SellerMessagesPage(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/notification_icon.svg',
-                          label: AppLocalizations.of(context)!.menu_alert_preferences,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const SellerAlertPreferencesPage(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/Question.svg',
-                          label: AppLocalizations.of(context)!.menu_help_support,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SellerHelpSupportPage(),
-                            ),
-                          ),
-                        ),
-                          _SMenuTile(
-                          iconAsset: 'assets/icons/setting.svg',
-                          label: AppLocalizations.of(context)!.menu_settings_label,
-                          isTablet: isTablet,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SellerSettingsPage(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: size.height * 0.021),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.cardDark : AppColors.white,
-                      borderRadius: BorderRadius.circular(size.width * 0.043),
-                      border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.border,
+
+                    const SizedBox(height: BuyerLayout.sectionGap),
+
+                    Container(
+                      decoration: BuyerLayout.cardDecoration(context),
+                      child: _SMenuTile(
+                        iconAsset: 'assets/icons/sign_out_symbol.svg',
+                        label: AppLocalizations.of(context)!.menu_sign_out,
+                        iconColor: buyer.AppColors.error,
+                        textColor: buyer.AppColors.error,
+                        onTap: () =>
+                            _showSignOutDialog(context, isTablet, ref),
                       ),
                     ),
-                    child: _SMenuTile(
-                      iconAsset: 'assets/icons/sign_out_symbol.svg',
-                      label: AppLocalizations.of(context)!.menu_sign_out,
-                      isTablet: isTablet,
-                      iconColor: AppColors.error,
-                      textColor: AppColors.error,
-                      onTap: () => _showSignOutDialog(context, isTablet, ref),
-                    ),
-                  ),
-                  SizedBox(height: size.height * 0.021),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.cardDark : AppColors.white,
-                      borderRadius: BorderRadius.circular(size.width * 0.043),
-                      border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.border,
-                      ),
-                    ),
-                    child: SwitchListTile(
-                      secondary: Icon(
-                        isDark ? Icons.dark_mode : Icons.light_mode,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimary,
-                      ),
-                      title: Text(
-                        AppLocalizations.of(context)!.menu_dark_mode_label,
-                        style: TextStyle(
+                    const SizedBox(height: BuyerLayout.sectionGap),
+                    Container(
+                      decoration: BuyerLayout.cardDecoration(context),
+                      child: SwitchListTile(
+                        secondary: Icon(
+                          isDark ? Icons.dark_mode : Icons.light_mode,
                           color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
+                              ? buyer.AppColors.darkText
+                              : buyer.AppColors.text,
                         ),
+                        title: Text(
+                          AppLocalizations.of(context)!.menu_dark_mode_label,
+                          style: TextStyle(
+                            color: isDark
+                                ? buyer.AppColors.darkText
+                                : buyer.AppColors.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        value: isDark,
+                        onChanged: (_) =>
+                            ref.read(themeModeProvider.notifier).toggle(),
                       ),
-                      value: isDark,
-                      onChanged: (_) =>
-                          ref.read(themeModeProvider.notifier).toggle(),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _refreshProfile(BuildContext context, WidgetRef ref) async {
+    final token = ApiClient().accessToken;
+    if (token != null) {
+      final user = decodeUserFromJwt(token);
+      if (user != null) {
+        await ref.read(currentUserProvider.notifier).setUser(user);
+      }
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.profile_refreshed),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   void _showSignOutDialog(BuildContext context, bool isTablet, WidgetRef ref) {
@@ -354,7 +379,6 @@ class _SMenuTile extends StatelessWidget {
   final String? iconAsset;
   final IconData? materialIcon;
   final String label;
-  final bool isTablet;
   final VoidCallback onTap;
   final Color? iconColor;
   final Color? textColor;
@@ -363,7 +387,6 @@ class _SMenuTile extends StatelessWidget {
     this.iconAsset,
     this.materialIcon,
     required this.label,
-    required this.isTablet,
     required this.onTap,
     this.iconColor,
     this.textColor,
@@ -371,47 +394,47 @@ class _SMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveIconColor =
         iconColor ??
-        (isDark ? AppColors.textSecondaryDark : AppColors.textSecondary);
+        (isDark
+            ? buyer.AppColors.darkTextSecondary
+            : buyer.AppColors.grey600);
     final effectiveTextColor =
-        textColor ?? (isDark ? AppColors.textPrimaryDark : AppColors.black);
+        textColor ?? (isDark ? buyer.AppColors.darkText : buyer.AppColors.text);
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: size.width * 0.04,
-          vertical: size.height * 0.022,
+        padding: const EdgeInsets.symmetric(
+          horizontal: BuyerLayout.cardPadding,
+          vertical: 14,
         ),
         child: Row(
           children: [
-            if (materialIcon != null)
-              Icon(
-                materialIcon,
-                size: isTablet ? 26 : size.width * 0.06,
-                color: effectiveIconColor,
-              )
-            else
-              SvgPicture.asset(
-                iconAsset!,
-                width: isTablet ? 26 : size.width * 0.06,
-                height: isTablet ? 26 : size.width * 0.06,
-                colorFilter: ColorFilter.mode(
-                  effectiveIconColor,
-                  BlendMode.srcIn,
-                ),
-              ),
-            SizedBox(width: size.width * 0.04),
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: materialIcon != null
+                  ? Icon(materialIcon, size: 22, color: effectiveIconColor)
+                  : SvgPicture.asset(
+                      iconAsset!,
+                      width: 22,
+                      height: 22,
+                      colorFilter: ColorFilter.mode(
+                        effectiveIconColor,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+            ),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
-                  fontSize: size.width * 0.04,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: effectiveTextColor,
                 ),
@@ -419,8 +442,12 @@ class _SMenuTile extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: effectiveIconColor,
-              size: isTablet ? 22 : 20,
+              size: 20,
+              color:
+                  iconColor ??
+                  (isDark
+                      ? buyer.AppColors.darkTextSecondary
+                      : buyer.AppColors.grey400),
             ),
           ],
         ),

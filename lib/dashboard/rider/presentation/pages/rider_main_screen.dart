@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:market_mate/core/providers/locale_provider.dart';
 import 'package:market_mate/core/theme/app_colors.dart';
+import 'package:market_mate/dashboard/shared/dashboard_layout.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import 'package:market_mate/dashboard/rider/providers/rider_dashboard_provider.dart';
 import 'rider_home_page.dart';

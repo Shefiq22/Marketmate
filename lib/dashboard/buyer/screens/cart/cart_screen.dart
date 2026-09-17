@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/buyer_layout.dart';
 import '../../data/cart_provider.dart';
 import '../../widgets/common_widgets.dart';
 import '../cart/checkout_screen.dart';
@@ -52,11 +53,11 @@ class _CartScreenState extends State<CartScreen> {
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
+          padding: const EdgeInsets.only(left: BuyerLayout.screenPadding),
           child: IconButton(
             icon: Icon(
-              Icons.arrow_back_ios_new,
-              size: 20.0,
+              Icons.arrow_back_ios_new_rounded,
+              size: 18,
               color: isDark ? AppColors.darkText : AppColors.text,
             ),
             onPressed: () {
@@ -78,8 +79,10 @@ class _CartScreenState extends State<CartScreen> {
         title: Text(
           l10n.cart_title,
           style: TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
             color: isDark ? AppColors.darkText : AppColors.text,
           ),
         ),

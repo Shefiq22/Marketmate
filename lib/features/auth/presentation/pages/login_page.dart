@@ -8,6 +8,7 @@ import 'package:market_mate/features/auth/provider/auth_provider.dart';
 import 'package:market_mate/features/auth/provider/current_user_provider.dart';
 import 'package:market_mate/features/auth/provider/pending_verification_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../widgets/auth_ui.dart';
 import 'login_success_page.dart';
 import 'questionnaire_screen.dart';
 import 'verify_email_page.dart';
@@ -297,434 +298,204 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.watch(pendingVerificationProvider);
     final showVerifyPanel = form.needsVerification ||
         (form.error != null && isUnverifiedAccountMessage(form.error!));
-    final size = MediaQuery.sizeOf(context);
-    final isTablet = size.shortestSide >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inputRadius = BorderRadius.circular(12);
-    final labelSize = isTablet ? 16.0 : 14.0;
-    final inputFontSize = isTablet ? 16.0 : 15.0;
-
-    final emailBorderColor = form.emailError ? AppColors.error : AppColors.border;
-    final passwordBorderColor = form.passwordError ? AppColors.error : AppColors.border;
-
-    InputDecoration fieldDecoration({
-      String? hint,
-      Widget? suffix,
-      Color? borderColor,
-    }) =>
-        InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontSize: inputFontSize,
-            fontWeight: FontWeight.w400,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.gray2,
-          ),
-          suffixIcon: suffix,
-          filled: true,
-          fillColor: isDark ? AppColors.surfaceDark : AppColors.white,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: isTablet ? 20 : 17,
-          ),
-            enabledBorder: OutlineInputBorder(
-            borderRadius: inputRadius,
-            borderSide: BorderSide(color: borderColor ?? (isDark ? AppColors.borderDark : AppColors.border), width: 1.4),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: inputRadius,
-            borderSide: BorderSide(color: isDark ? AppColors.borderDark : AppColors.border, width: 2.0),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: inputRadius,
-            borderSide: BorderSide(color: AppColors.error, width: 1.4),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: inputRadius,
-            borderSide: BorderSide(color: AppColors.error, width: 2.0),
-          ),
-        );
-
-    Widget fieldLabel(String text) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: RichText(
-                text: TextSpan(
-              text: text,
-              style: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: labelSize,
-                fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.black,
-              ),
-            ),
-          ),
-        );
-
-    TextStyle inputStyle() => TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
-          fontSize: inputFontSize,
-          color: isDark ? AppColors.textPrimaryDark : AppColors.black,
-        );
-
     final canPop = Navigator.of(context).canPop();
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16.0, size.height * 0.04, 16.0, size.height * 0.03),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              if (canPop)
-                Padding(
-                  padding: EdgeInsets.only(bottom: size.height * 0.03),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                      height: isTablet ? 44 : 38,
-                      width: isTablet ? 44 : 38,
-                      child: IconButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back_ios_rounded),
-                        iconSize: isTablet ? 20 : 18,
-                          style: IconButton.styleFrom(
-                          backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
-                          foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                                color: isDark ? AppColors.borderDark : AppColors.border, width: 1.2),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
+    final emailBorderColor = form.emailError ? AppColors.error : null;
+    final passwordBorderColor = form.passwordError ? AppColors.error : null;
+
+    return AuthScreenBody(
+      bottomBar: AuthPrimaryButton(
+        label: 'Log in',
+        loading: form.isLoading,
+        onPressed: form.isValid && !form.isLoading && _loadingProvider == null
+            ? () async {
+                try {
+                  final repo = ref.read(authRepositoryProvider);
+                  final loginNotifier = ref.read(loginFormProvider.notifier);
+                  final data = await loginNotifier.login(repo);
+                  if (data != null) {
+                    await _handleLoginSuccess(data);
+                  }
+                } catch (_) {
+                  if (!mounted) return;
+                  ref.read(loginFormProvider.notifier).setError(
+                        'Something went wrong. Please try again.',
+                      );
+                }
+              }
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (canPop) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                style: IconButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+                  foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.black,
+                  minimumSize: const Size(40, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isDark ? AppColors.borderDark : AppColors.border,
                     ),
                   ),
                 ),
-              SizedBox(height: size.height * 0.025),
-                Text(
-                'Welcome back',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: isTablet ? 34 : 28,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.black,
-                  letterSpacing: -0.5,
-                ),
               ),
-              SizedBox(height: size.height * 0.01),
-              Text(
-                'Log in to your account',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: isTablet ? 16 : 14,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            ),
+            const SizedBox(height: AuthSpacing.section),
+          ],
+          const AuthHeader(
+            title: 'Welcome back',
+            subtitle: 'Sign in to continue shopping fresh produce.',
+          ),
+          const SizedBox(height: AuthSpacing.section),
+          AutofillGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AuthFieldLabel('Email address'),
+                TextField(
+                  focusNode: _emailFocus,
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: notifier.setEmail,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.username, AutofillHints.email],
+                  style: authInputStyle(context),
+                  decoration: authFieldDecoration(
+                    context,
+                    hint: 'you@example.com',
+                    borderColor: emailBorderColor,
+                  ),
                 ),
-              ),
-              SizedBox(height: size.height * 0.045),
-              AutofillGroup(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: AuthSpacing.field),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    fieldLabel('Email Address'),
-                    TextField(
-                      focusNode: _emailFocus,
-                      keyboardType: TextInputType.emailAddress,
-                      onChanged: notifier.setEmail,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.username, AutofillHints.email],
-                      style: inputStyle(),
-                      decoration: fieldDecoration(
-                                hint: 'Enter here',
-                        borderColor: emailBorderColor,
+                    const AuthFieldLabel('Password'),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ForgotPasswordEmailPage(initialEmail: form.email),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: isTablet ? 22 : 18),
-                      Text(
-                      'Password',
-                      style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        fontSize: labelSize,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.black,
-                      ),
-                    ),
-                    TextField(
-                      focusNode: _passwordFocus,
-                      onChanged: notifier.setPassword,
-                      obscureText: !form.passwordVisible,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      style: inputStyle(),
-                      decoration: fieldDecoration(
-                        hint: 'Enter password here',
-                        borderColor: passwordBorderColor,
-                        suffix: GestureDetector(
-                          onTap: notifier.togglePassword,
-                          child: Padding(
-                            padding: const EdgeInsets.all(14),
-                              child: Icon(
-                              form.passwordVisible
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.gray2,
-                              size: isTablet ? 22 : 20,
-                            ),
-                          ),
+                      child: Text(
+                        'Forgot password?',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              if (form.error != null && !showVerifyPanel)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(isTablet ? 14 : 12),
-                      decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          color: AppColors.error,
-                          size: isTablet ? 20 : 18,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                form.error!,
-                                style: TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: isTablet ? 13 : 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.error,
-                                  height: 1.4,
-                                ),
-                              ),
-                              if (form.isWrongPasswordError)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: GestureDetector(
-                                    onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => ForgotPasswordEmailPage(initialEmail: form.email),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Forgot Password?',
-                                      style: TextStyle(
-                                        fontFamily: 'Plus Jakarta Sans',
-                                        fontSize: isTablet ? 13 : 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (showVerifyPanel)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(isTablet ? 18 : 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          form.error ?? 'Account not verified',
-                          style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
-                            fontSize: isTablet ? 14 : 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.error,
-                            height: 1.4,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: isTablet ? 14 : 12),
-                        SizedBox(
-                          width: double.infinity,
-                          height: isTablet ? 48 : 44,
-                          child: ElevatedButton(
-                            onPressed: _isVerifying ? null : _goVerify,
-                              style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              disabledBackgroundColor: isDark ? AppColors.borderDark : AppColors.border,
-                              shape: const StadiumBorder(),
-                              elevation: 0,
-                              textStyle: TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: isTablet ? 15 : 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            child: _isVerifying
-                                ? SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: const CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: AppColors.white,
-                                    ),
-                                  )
-                                : const Text('Verify Account'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    text: 'Do not have an account? ',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: isTablet ? 15 : 13,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
-                    ),
-                    children: [
-                      WidgetSpan(
-                        child: GestureDetector(
-                          onTap: () {
-                            final nav = Navigator.of(context);
-                            if (nav.canPop()) {
-                              nav.maybePop();
-                            } else {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const QuestionnaireScreen(),
-                                ),
-                              );
-                            }
-                          },
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: isTablet ? 15 : 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
-                              ),
-                            ),
+                TextField(
+                  focusNode: _passwordFocus,
+                  onChanged: notifier.setPassword,
+                  obscureText: !form.passwordVisible,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
+                  style: authInputStyle(context),
+                  decoration: authFieldDecoration(
+                    context,
+                    hint: 'Enter your password',
+                    borderColor: passwordBorderColor,
+                    suffix: GestureDetector(
+                      onTap: notifier.togglePassword,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          form.passwordVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.gray2,
+                          size: 20,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          if (form.error != null && !showVerifyPanel) ...[
+            const SizedBox(height: AuthSpacing.field),
+            AuthErrorBanner(
+              message: form.error!,
+              action: form.isWrongPasswordError
+                  ? GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ForgotPasswordEmailPage(initialEmail: form.email),
+                        ),
+                      ),
+                      child: const Text(
+                        'Reset password',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+          ],
+          if (showVerifyPanel) ...[
+            const SizedBox(height: AuthSpacing.field),
+            AuthErrorBanner(
+              message: form.error ?? 'Account not verified',
+              action: AuthPrimaryButton(
+                label: 'Verify account',
+                loading: _isVerifying,
+                onPressed: _isVerifying ? null : _goVerify,
               ),
-              const SizedBox(height: 20),
-              Center(
-                child: Text(
-                  'Or Create Account with',
-                  style: TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: isTablet ? 14 : 12,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.gray2,
-                  ),
-                ),
+            ),
+          ],
+          const SizedBox(height: AuthSpacing.section),
+          AuthLinkRow(
+            prefix: "Don't have an account? ",
+            linkText: 'Sign up',
+            onTap: () {
+              final nav = Navigator.of(context);
+              if (nav.canPop()) {
+                nav.maybePop();
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const QuestionnaireScreen()),
+                );
+              }
+            },
+          ),
+          const SizedBox(height: AuthSpacing.section),
+          const AuthOrDivider(),
+          const SizedBox(height: AuthSpacing.field),
+          Row(
+            children: [
+              AuthSocialButton(
+                icon: 'assets/icons/google.png',
+                onTap: _signInWithGoogle,
+                loading: _loadingProvider == 'google',
               ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  _SocialButton(
-                    icon: 'assets/icons/google.png',
-                    onTap: _signInWithGoogle,
-                    loading: _loadingProvider == 'google',
-                  ),
-                  const SizedBox(width: 12),
-                  _SocialButton(
-                    icon: 'assets/icons/facebook.png',
-                    onTap: _signInWithFacebook,
-                    loading: _loadingProvider == 'facebook',
-                  ),
-                ],
+              const SizedBox(width: 12),
+              AuthSocialButton(
+                icon: 'assets/icons/facebook.png',
+                onTap: _signInWithFacebook,
+                loading: _loadingProvider == 'facebook',
               ),
-              const SizedBox(height: 16),
             ],
           ),
-        ),
+        ],
       ),
-    ),
-    bottomNavigationBar: Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, MediaQuery.of(context).padding.bottom + 12.0),
-        child: SizedBox(
-          width: double.infinity,
-          height: isTablet ? 64 : 56,
-          child: ElevatedButton(
-            onPressed: form.isValid && !form.isLoading && _loadingProvider == null
-                ? () async {
-                    try {
-                      final repo = ref.read(authRepositoryProvider);
-                      final notifier = ref.read(loginFormProvider.notifier);
-                      final data = await notifier.login(repo);
-                      if (data != null) {
-                        await _handleLoginSuccess(data);
-                      }
-                    } catch (_) {
-                      if (!mounted) return;
-                      ref.read(loginFormProvider.notifier).setError('Something went wrong. Please try again.');
-                    }
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                disabledBackgroundColor: isDark ? AppColors.borderDark : AppColors.border,
-                disabledForegroundColor: isDark ? AppColors.textDisabledDark : AppColors.gray2,
-                shape: const StadiumBorder(),
-                elevation: 0,
-                textStyle: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: isTablet ? 18 : 17,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            child: form.isLoading
-                ? SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppColors.white,
-                      ),
-                  )
-                : const Text('Log in'),
-        ),
-      ),
-    ),
-  );
+    );
   }
 
   String _extractUserIdFromData(Map<String, dynamic>? user) {
@@ -733,52 +504,3 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  final String icon;
-  final VoidCallback onTap;
-  final bool loading;
-
-  const _SocialButton({
-    required this.icon,
-    required this.onTap,
-    this.loading = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: loading ? null : onTap,
-        child: Container(
-          height: isTablet ? 60 : 54,
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.cardDark : AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border, width: 1.4),
-          ),
-          child: Center(
-            child: loading
-                ? SizedBox(
-                    width: isTablet ? 22 : 20,
-                    height: isTablet ? 22 : 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.black,
-                    ),
-                  )
-                : Image.asset(
-                    icon,
-                    width: isTablet ? 28 : 24,
-                    height: isTablet ? 28 : 24,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-}

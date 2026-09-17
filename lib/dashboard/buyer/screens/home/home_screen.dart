@@ -10,6 +10,7 @@ import 'package:market_mate/features/auth/provider/current_user_provider.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 
 import '../../theme/app_theme.dart';
+import '../../theme/buyer_layout.dart';
 import '../../models/models.dart';
 import '../../data/cart_provider.dart';
 import '../../widgets/common_widgets.dart';
@@ -196,7 +197,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onRefresh: _refresh,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(
+            bottom: BuyerLayout.bottomNavClearance,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -225,7 +228,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     : 'User'));
     return Container(
       color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: BuyerLayout.screenPadding,
+        vertical: 12,
+      ),
       child: Row(
         children: [
           Container(

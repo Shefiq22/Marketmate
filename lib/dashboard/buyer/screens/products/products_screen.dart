@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/buyer_layout.dart';
 import '../../data/cart_provider.dart';
 import '../../models/models.dart';
 import '../../widgets/common_widgets.dart';
@@ -62,17 +63,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final mq = MediaQuery.sizeOf(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final s16 = mq.width * 0.04;
-    final s12 = mq.width * 0.03;
-    final s10 = mq.width * 0.025;
-    final h4 = mq.height * 0.005;
-    final h8 = mq.height * 0.01;
-    final h12 = mq.height * 0.015;
-    final catIcon = mq.width * 0.14;
-    final hChips = catIcon + 24.0;
-    final iconBtn = mq.width * 0.115;
+    const catIcon = 52.0;
+    const hChips = catIcon + 24.0;
+    const iconBtn = 44.0;
+    const pad = BuyerLayout.screenPadding;
+    const gapSm = 8.0;
+    const gapMd = 12.0;
+    const gapXs = 4.0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -92,7 +90,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Padding(
-                          padding: EdgeInsets.fromLTRB(s16, 0, s16, h12),
+                          padding: const EdgeInsets.fromLTRB(
+                            BuyerLayout.screenPadding,
+                            0,
+                            BuyerLayout.screenPadding,
+                            12,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
@@ -147,17 +150,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: s10),
+                              const SizedBox(width: gapSm),
                               Container(
                                 width: iconBtn,
                                 height: iconBtn,
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryBg,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.tune_rounded,
-                                  size: mq.width * 0.05,
+                                  size: 20,
                                   color: AppColors.primary,
                                 ),
                               ),
@@ -168,23 +171,25 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: EdgeInsets.fromLTRB(s16, h4, s16, h8),
-                              child:                               Text(
+                              padding: const EdgeInsets.fromLTRB(pad, gapXs, pad, gapSm),
+                              child: Text(
                                 l10n.products_categories,
                                 style: TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
                                   color: isDark ? AppColors.white : AppColors.text,
                                 ),
                               ),
                             ),
                             SizedBox(
-                                height: hChips,
+                              height: hChips,
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.fromLTRB(s16, 0, s16, 0),
+                                padding: const EdgeInsets.fromLTRB(pad, 0, pad, 0),
                                 itemCount: _categories(l10n).length,
-                                separatorBuilder: (_, __) => SizedBox(width: s12),
+                                separatorBuilder: (_, __) => const SizedBox(width: gapMd),
                                 itemBuilder: (_, i) {
                                   final cat = _categories(l10n)[i];
                                   final isActive = _activeCategory == cat['id'];
@@ -208,7 +213,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                           child: cat['icon'] != null
                                               ? Icon(
                                                   cat['icon'] as IconData,
-                                                  size: mq.width * 0.06,
+                                                  size: 24,
                                                   color: isActive
                                                       ? AppColors.white
                                                       : AppColors.primary,
@@ -222,7 +227,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                                   ),
                                                 ),
                                         ),
-                                        SizedBox(height: h4),
+                                        const SizedBox(height: gapXs),
                                         Text(
                                           cat['label']!,
                                           style: TextStyle(
@@ -260,11 +265,16 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          padding: const EdgeInsets.fromLTRB(
+                            BuyerLayout.screenPadding,
+                            0,
+                            BuyerLayout.screenPadding,
+                            8,
+                          ),
                           child: SectionHeader(title: l10n.products_browse),
                         ),
                         SizedBox(
-                          height: mq.height * 0.55,
+                          height: 420,
                           child: _filtered.isEmpty
                               ? EmptyState(
                                   emoji: '📦',
@@ -288,18 +298,18 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildGrid() {
-    final mq = MediaQuery.sizeOf(context);
-    final s16 = mq.width * 0.04;
-    final s12 = mq.width * 0.03;
-    final h12 = mq.height * 0.015;
-    final h24 = mq.height * 0.03;
     return GridView.builder(
-      padding: EdgeInsets.fromLTRB(s16, 0, s16, h24),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      padding: const EdgeInsets.fromLTRB(
+        BuyerLayout.screenPadding,
+        0,
+        BuyerLayout.screenPadding,
+        BuyerLayout.sectionGap,
+      ),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.72,
-        crossAxisSpacing: s12,
-        mainAxisSpacing: h12,
+        crossAxisSpacing: BuyerLayout.itemGap,
+        mainAxisSpacing: BuyerLayout.itemGap,
       ),
       itemCount: _filtered.length,
       itemBuilder: (_, i) => ProductCard(
@@ -310,14 +320,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildList() {
-    final mq = MediaQuery.sizeOf(context);
-    final s16 = mq.width * 0.04;
-    final h12 = mq.height * 0.015;
-    final h24 = mq.height * 0.03;
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(s16, 0, s16, h24),
+      padding: const EdgeInsets.fromLTRB(
+        BuyerLayout.screenPadding,
+        0,
+        BuyerLayout.screenPadding,
+        BuyerLayout.sectionGap,
+      ),
       itemCount: _filtered.length,
-      separatorBuilder: (_, __) => SizedBox(height: h12),
+      separatorBuilder: (_, __) => const SizedBox(height: BuyerLayout.itemGap),
       itemBuilder: (_, i) => _ListProductCard(
         product: _filtered[i],
         onTap: () => _openDetail(_filtered[i]),
@@ -340,16 +351,7 @@ class _ListProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.sizeOf(context);
-    final s12 = mq.width * 0.03;
-    final s4 = mq.width * 0.01;
-    final s14 = mq.width * 0.035;
-    final s10 = mq.width * 0.025;
-    final h4 = mq.height * 0.005;
-    final h8 = mq.height * 0.01;
-    final h12 = mq.height * 0.015;
-    final listImg = mq.width * 0.25;
-
+    const listImg = 88.0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final outOfStock = !product.inStock;
     return GestureDetector(
@@ -357,26 +359,12 @@ class _ListProductCard extends StatelessWidget {
       child: Opacity(
         opacity: outOfStock ? 0.5 : 1.0,
         child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkElevated : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.border,
-          ),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-          ],
-        ),
+        decoration: BuyerLayout.cardDecoration(context),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(12),
+                left: Radius.circular(BuyerLayout.cardRadius),
               ),
               child: Stack(
                 children: [
@@ -406,41 +394,44 @@ class _ListProductCard extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: s12),
+            const SizedBox(width: BuyerLayout.itemGap),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: h12, horizontal: s4),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       product.category,
                       style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 11,
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.grey500,
                       ),
                     ),
-                    SizedBox(height: h4),
+                    const SizedBox(height: 4),
                     Text(
                       product.name,
                       style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: isDark ? AppColors.darkText : AppColors.text,
                       ),
                     ),
-                    SizedBox(height: h8),
+                    const SizedBox(height: 6),
                     Text(
                       formatPrice(product.price),
                       style: const TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primary,
                       ),
                     ),
-                    SizedBox(height: h4),
+                    const SizedBox(height: 4),
                     StarRow(rating: product.rating, count: product.reviewCount),
                   ],
                 ),
@@ -448,15 +439,15 @@ class _ListProductCard extends StatelessWidget {
             ),
             Flexible(
               child: Padding(
-                padding: EdgeInsets.only(right: s12),
+                padding: const EdgeInsets.only(right: BuyerLayout.itemGap),
                 child: product.inStock
                     ? GestureDetector(
                         onTap: () =>
                             context.read<CartProvider>().addItem(product),
                         child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: s14,
-                            vertical: h8,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.primary,
@@ -464,7 +455,8 @@ class _ListProductCard extends StatelessWidget {
                           ),
                           child: Text(
                             AppLocalizations.of(context)!.products_add,
-                            style: TextStyle(
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppColors.white,
@@ -473,9 +465,9 @@ class _ListProductCard extends StatelessWidget {
                         ),
                       )
                     : Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: s10,
-                          vertical: h8,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
                         ),
                         decoration: BoxDecoration(
                           color: isDark

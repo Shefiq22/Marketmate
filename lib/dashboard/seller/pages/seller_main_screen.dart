@@ -9,6 +9,7 @@ import 'seller_categories_page.dart';
 import 'seller_orders_page.dart';
 import 'package:market_mate/dashboard/seller/pages/assign_rider_map_page.dart';
 import 'Seller_profile_menu page.dart';
+import 'package:market_mate/dashboard/shared/dashboard_layout.dart';
 
 class SellerMainScreen extends ConsumerStatefulWidget {
   const SellerMainScreen({super.key});
@@ -69,16 +70,19 @@ class _SellerMainScreenState extends ConsumerState<SellerMainScreen> {
             padding.bottom + (isTablet ? 16 : 12),
           ),
           child: Container(
-            height: isTablet ? 72 : 64,
+            height: isTablet ? DashboardLayout.navHeightTablet : DashboardLayout.navHeight,
             decoration: BoxDecoration(
               color: isDark ? AppColors.cardDark : AppColors.white,
-              borderRadius: BorderRadius.circular(isTablet ? 28 : 24),
+              borderRadius: BorderRadius.circular(isTablet ? 24 : 20),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.border,
+              ),
               boxShadow: isDark
                   ? []
                   : [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 24,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 20,
                         spreadRadius: 0,
                         offset: const Offset(0, 4),
                       ),

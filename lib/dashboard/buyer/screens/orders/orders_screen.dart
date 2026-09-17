@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/buyer_layout.dart';
 import '../../models/models.dart';
 import '../../widgets/common_widgets.dart';
 import '../../providers/orders_provider.dart';
@@ -41,15 +42,22 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    padding: const EdgeInsets.fromLTRB(
+                      BuyerLayout.screenPadding,
+                      16,
+                      BuyerLayout.screenPadding,
+                      0,
+                    ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         l10n.orders_title,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 20,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
                           color: isDark ? AppColors.darkText : AppColors.text,
                         ),
                       ),
@@ -81,9 +89,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BuyerLayout.screenPadding,
+                  ),
                   child: TabBar(
                     isScrollable: true,
                     tabAlignment: TabAlignment.start,

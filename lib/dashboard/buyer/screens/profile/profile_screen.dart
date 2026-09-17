@@ -10,6 +10,7 @@ import 'package:market_mate/dashboard/seller/pages/sellers_messages_page.dart';
 import 'package:market_mate/dashboard/seller/pages/seller_alert_preferences_page.dart';
 import 'package:market_mate/dashboard/seller/pages/seller_help_support_page.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/buyer_layout.dart';
 import '../../../../core/providers/theme_provider.dart';
 import 'address_book_screen.dart';
 import 'edit_profile_screen.dart';
@@ -45,40 +46,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(currentUserProvider);
-    final size = MediaQuery.sizeOf(context);
-    final w = size.width;
-    final h = size.height;
     final isDark = ref.watch(isDarkModeProvider);
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: BuyerLayout.maxContentWidth),
             child: RefreshIndicator(
               onRefresh: _refreshProfile,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.all(w * 0.04),
+                padding: BuyerLayout.screenInsets(
+                  bottom: BuyerLayout.bottomNavClearance,
+                ),
                 child: Column(
                   children: [
                     Container(
                       width: double.infinity,
-                      padding: EdgeInsets.all(w * 0.04),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.white,
-                        borderRadius: BorderRadius.circular(w * 0.043),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.border,
-                        ),
-                      ),
+                      padding: const EdgeInsets.all(BuyerLayout.cardPadding),
+                      decoration: BuyerLayout.cardDecoration(context),
                       child: Row(
                         children: [
                           Container(
-                            width: w * 0.147,
-                            height: w * 0.147,
+                            width: 56,
+                            height: 56,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: AppColors.primaryBg,
@@ -90,15 +82,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             child: Center(
                               child: Text(
                                 user?.initial ?? '?',
-                                style: TextStyle(
-                                  fontSize: w * 0.047,
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primary,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: w * 0.035),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,18 +101,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       ? user!.name
                                       : '',
                                   style: TextStyle(
-                                    fontSize: w * 0.043,
-                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.2,
                                     color: isDark
                                         ? AppColors.darkText
                                         : AppColors.text,
                                   ),
                                 ),
-                                SizedBox(height: h * 0.004),
+                                const SizedBox(height: 2),
                                 Text(
                                   user?.email ?? '',
                                   style: TextStyle(
-                                    fontSize: w * 0.035,
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 13,
                                     color: isDark
                                         ? AppColors.darkTextSecondary
                                         : AppColors.grey500,
@@ -129,18 +125,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: w * 0.027,
-                              vertical: h * 0.005,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.primaryBg,
-                              borderRadius: BorderRadius.circular(w * 0.053),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               user?.role.replaceAll('_', ' ') ?? '',
-                              style: TextStyle(
-                                fontSize: w * 0.03,
+                              style: const TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
                               ),
@@ -149,25 +146,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: h * 0.021),
+                    const SizedBox(height: BuyerLayout.sectionGap),
 
                     Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.white,
-                        borderRadius: BorderRadius.circular(w * 0.043),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.border,
-                        ),
-                      ),
+                      decoration: BuyerLayout.cardDecoration(context),
                       child: Column(
                         children: [
                           _MenuItem(
                             icon: Image.asset(
                               'assets/icons/Profile.png',
-                              width: w * 0.057,
-                              height: w * 0.057,
+                              width: 22,
+                              height: 22,
                               fit: BoxFit.contain,
                               color: AppColors.grey600,
                             ),
@@ -182,7 +171,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: Icon(
                               Icons.location_on_outlined,
-                              size: w * 0.057,
+                              size: 22,
                               color: AppColors.grey600,
                             ),
                             label: l10n.menu_address_book,
@@ -196,8 +185,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: SvgPicture.asset(
                               'assets/icons/messages.svg',
-                              width: w * 0.057,
-                              height: w * 0.057,
+                              width: 22,
+                              height: 22,
                               colorFilter: ColorFilter.mode(
                                 AppColors.grey600,
                                 BlendMode.srcIn,
@@ -214,8 +203,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: SvgPicture.asset(
                               'assets/icons/notification_icon.svg',
-                              width: w * 0.057,
-                              height: w * 0.057,
+                              width: 22,
+                              height: 22,
                               colorFilter: ColorFilter.mode(
                                 AppColors.grey600,
                                 BlendMode.srcIn,
@@ -233,8 +222,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: SvgPicture.asset(
                               'assets/icons/Question.svg',
-                              width: w * 0.057,
-                              height: w * 0.057,
+                              width: 22,
+                              height: 22,
                               colorFilter: ColorFilter.mode(
                                 AppColors.grey600,
                                 BlendMode.srcIn,
@@ -251,7 +240,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: Icon(
                               Icons.settings_outlined,
-                              size: w * 0.057,
+                              size: 22,
                               color: AppColors.grey600,
                             ),
                             label: l10n.menu_settings_label,
@@ -265,7 +254,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           _MenuItem(
                             icon: Icon(
                               Icons.card_giftcard_outlined,
-                              size: w * 0.057,
+                              size: 22,
                               color: AppColors.grey600,
                             ),
                             label: 'Referrals & Wallet',
@@ -280,22 +269,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
 
-                    SizedBox(height: h * 0.021),
+                    const SizedBox(height: BuyerLayout.sectionGap),
 
                     Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.white,
-                        borderRadius: BorderRadius.circular(w * 0.043),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.border,
-                        ),
-                      ),
+                      decoration: BuyerLayout.cardDecoration(context),
                       child: _MenuItem(
                         icon: Icon(
                           Icons.logout_rounded,
-                          size: w * 0.057,
+                          size: 22,
                           color: AppColors.error,
                         ),
                         label: l10n.menu_sign_out,
@@ -304,17 +285,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         onTap: () => _showSignOutDialog(context, ref, isDark),
                       ),
                     ),
-                    SizedBox(height: h * 0.021),
+                    const SizedBox(height: BuyerLayout.sectionGap),
                     Container(
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.white,
-                        borderRadius: BorderRadius.circular(w * 0.043),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.darkBorder
-                              : AppColors.border,
-                        ),
-                      ),
+                      decoration: BuyerLayout.cardDecoration(context),
                       child: SwitchListTile(
                         secondary: Icon(
                           isDark ? Icons.dark_mode : Icons.light_mode,
@@ -458,25 +431,24 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final w = size.width;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: w * 0.04,
-          vertical: w * 0.039,
+        padding: const EdgeInsets.symmetric(
+          horizontal: BuyerLayout.cardPadding,
+          vertical: 14,
         ),
         child: Row(
           children: [
-            SizedBox(width: w * 0.057, height: w * 0.057, child: icon),
-            SizedBox(width: w * 0.035),
+            SizedBox(width: 22, height: 22, child: icon),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: w * 0.04,
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color:
                       textColor ??
@@ -485,8 +457,8 @@ class _MenuItem extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right,
-              size: w * 0.052,
+              Icons.chevron_right_rounded,
+              size: 20,
               color:
                   iconColor ??
                   (isDark ? AppColors.darkTextSecondary : AppColors.grey400),

@@ -66,16 +66,20 @@ class _MainShellState extends ConsumerState<MainShell> {
           padding.bottom + (isTablet ? 16 : 12),
         ),
         child: Container(
-          height: isTablet ? 72 : 64,
+          height: isTablet ? 68 : 62,
           decoration: BoxDecoration(
             color: isDark ? AppColors.cardDark : AppColors.white,
-            borderRadius: BorderRadius.circular(isTablet ? 28 : 24),
+            borderRadius: BorderRadius.circular(isTablet ? 24 : 20),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.border,
+              width: 1,
+            ),
             boxShadow: isDark
                 ? []
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.10),
-                      blurRadius: 24,
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 20,
                       spreadRadius: 0,
                       offset: const Offset(0, 4),
                     ),
@@ -187,8 +191,9 @@ class _NavItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
-                fontSize: isTablet ? 12 : 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                fontSize: isTablet ? 11 : 10,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: active ? 0.1 : 0,
                 color: active ? AppColors.primary : inactiveColor,
               ),
             ),
@@ -273,8 +278,9 @@ class _CartNavItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontFamily: 'Plus Jakarta Sans',
-                fontSize: isTablet ? 12 : 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                fontSize: isTablet ? 11 : 10,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                letterSpacing: active ? 0.1 : 0,
                 color: active ? AppColors.primary : inactiveColor,
               ),
             ),

@@ -16,7 +16,7 @@ class AppColors {
   static const white = Color(0xFFFFFFFF);
   static const black = Color(0xFF1A1A1A);
   static Color get background =>
-      _brightness == Brightness.dark ? darkBackground : const Color(0xFFF8F9FA);
+      _brightness == Brightness.dark ? darkBackground : const Color(0xFFF7F8F9);
   static const surface = Color(0xFFFFFFFF);
   static const border = Color(0xFFEEEEEE);
   static const borderLight = Color(0xFFF5F5F5);

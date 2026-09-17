@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
+import '../theme/buyer_layout.dart';
 import '../models/models.dart';
 import '../data/cart_provider.dart';
 import 'package:provider/provider.dart';
@@ -131,26 +132,28 @@ class ProductCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkElevated : AppColors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(BuyerLayout.cardRadius),
           border: Border.all(
             color: outOfStock
                 ? AppColors.error.withValues(alpha: 0.35)
                 : (isDark ? AppColors.darkBorder : AppColors.border),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+                top: Radius.circular(BuyerLayout.cardRadius),
               ),
               child: Stack(
                 children: [
@@ -186,7 +189,7 @@ class ProductCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(BuyerLayout.cardPadding),
               child: Opacity(
                 opacity: outOfStock ? 0.55 : 1.0,
                 child: Column(
@@ -353,8 +356,10 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 16,
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 17,
             fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
             color: isDark ? AppColors.white : AppColors.text,
           ),
         ),
@@ -362,10 +367,11 @@ class SectionHeader extends StatelessWidget {
           GestureDetector(
             onTap: onSeeAll,
             child: Text(
-              'See All',
+              'See all',
               style: TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: AppColors.primary,
               ),
             ),
@@ -438,10 +444,13 @@ PreferredSizeWidget customAppBar(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkCard : AppColors.grey100,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.border,
+                ),
               ),
               child: Icon(
-                Icons.arrow_back_ios_new,
+                Icons.arrow_back_ios_new_rounded,
                 size: 16,
                 color: isDark ? AppColors.darkText : AppColors.text,
               ),
@@ -451,8 +460,10 @@ PreferredSizeWidget customAppBar(
     title: Text(
       title,
       style: TextStyle(
+        fontFamily: 'Plus Jakarta Sans',
         fontSize: 17,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
         color: isDark ? AppColors.darkText : AppColors.text,
       ),
     ),
@@ -490,12 +501,21 @@ class GreenButton extends StatelessWidget {
               : outlined
                   ? (isDark ? AppColors.darkSurface : AppColors.white)
                   : AppColors.primary,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(BuyerLayout.cardRadius),
           border: _disabled
               ? null
               : outlined
-                  ? Border.all(color: AppColors.primary)
+                  ? Border.all(color: AppColors.primary, width: 1.5)
                   : null,
+          boxShadow: _disabled || outlined
+              ? []
+              : [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         child: Center(
           child: isLoading
@@ -510,8 +530,10 @@ class GreenButton extends StatelessWidget {
               : Text(
                   label,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                     color: _disabled
                         ? AppColors.textSecondary
                         : outlined
@@ -542,17 +564,22 @@ class EmptyState extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BuyerLayout.screenPadding * 2,
+          vertical: 48,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 56)),
-            const SizedBox(height: 16),
+            Text(emoji, style: const TextStyle(fontSize: 48)),
+            const SizedBox(height: 20),
             Text(
               title,
               style: TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
                 color: isDark ? AppColors.darkText : AppColors.text,
               ),
             ),
@@ -560,7 +587,9 @@ class EmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
                 fontSize: 14,
+                height: 1.5,
                 color: isDark
                     ? AppColors.darkTextSecondary
                     : AppColors.textSecondary,
