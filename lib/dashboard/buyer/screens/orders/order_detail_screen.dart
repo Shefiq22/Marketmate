@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:market_mate/core/utils/order_status_utils.dart';
 import 'package:market_mate/features/chat/presentation/pages/order_chat_page.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
@@ -65,7 +67,7 @@ class OrderDetailScreen extends StatelessWidget {
 
                   const SizedBox(height: 24.0),
 
-                  _OrderProgress(status: order.status),
+                  _OrderProgress(order: order),
 
                   if (orderAwaitsCustomerConfirmation(order.status)) ...[
                     const SizedBox(height: 16.0),
@@ -255,14 +257,15 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = status == 'active'
+    final group = OrderStatusUtils.tabGroup(status);
+    final color = group == 'active'
         ? AppColors.primary
-        : status == 'pending'
+        : group == 'pending'
         ? AppColors.orange
         : AppColors.grey500;
-    final label = status == 'active'
+    final label = group == 'active'
         ? 'Active'
-        : status == 'pending'
+        : group == 'pending'
         ? 'Pending'
         : 'Completed';
     return Container(
@@ -283,18 +286,61 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
+String _formatTimestamp(String raw) {
+  final dt = DateTime.tryParse(raw);
+  if (dt == null) return '';
+  return DateFormat('MMMM d, y — hh:mm a').format(dt.toLocal());
+}
+
 class _OrderProgress extends StatelessWidget {
-  final String status;
-  const _OrderProgress({required this.status});
+  final Order order;
+  const _OrderProgress({required this.order});
+
+  String _dateFor(List<String> matchStatuses) {
+    final matches =
+        order.statusHistory.where((e) => matchStatuses.contains(e.status));
+    if (matches.isEmpty) return '';
+    return _formatTimestamp(matches.last.changedAt);
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final currentStep = OrderStatusUtils.trackingStep(order.status).index;
+
     final steps = [
-      {'label': AppLocalizations.of(context)!.order_detail_ordered, 'done': true},
-      {'label': AppLocalizations.of(context)!.order_detail_confirmed, 'done': status != 'pending'},
-      {'label': AppLocalizations.of(context)!.order_detail_shipped, 'done': status == 'active'},
-      {'label': AppLocalizations.of(context)!.order_detail_delivered, 'done': false},
+      {'label': l10n.order_detail_ordered, 'done': true},
+      {'label': l10n.order_detail_confirmed, 'done': currentStep >= 1},
+      {'label': l10n.order_detail_shipped, 'done': currentStep >= 2},
+      {'label': l10n.order_detail_delivered, 'done': currentStep >= 3},
+    ];
+
+    final items = [
+      {
+        'title': l10n.order_detail_ordered,
+        'subtitle': 'Your order has been received',
+        'date': _dateFor(['pending', 'order_accepted']),
+        'done': true,
+      },
+      {
+        'title': l10n.order_detail_confirmed,
+        'subtitle': "We've confirmed your order",
+        'date': _dateFor(['order_accepted']),
+        'done': currentStep >= 1,
+      },
+      {
+        'title': l10n.order_detail_shipped,
+        'subtitle': 'Your order is on the way',
+        'date': _dateFor(['in_transit', 'rider_assigned', 'ready_for_pickup']),
+        'done': currentStep >= 2,
+      },
+      {
+        'title': l10n.order_detail_delivered,
+        'subtitle': 'Expected delivery',
+        'date': _dateFor(['order_arrived', 'completed', 'delivered']),
+        'done': currentStep >= 3,
+      },
     ];
 
     return Column(
@@ -355,120 +401,88 @@ class _OrderProgress extends StatelessWidget {
           }),
         ),
         const SizedBox(height: 24.0),
-        ..._buildProgressItems(context, status),
-      ],
-    );
-  }
-
-  List<Widget> _buildProgressItems(BuildContext context, String status) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final items = [
-      {
-        'title': 'Order placed',
-        'subtitle': 'Your order has been received',
-        'date': 'January 19, 2026 — 09:30 AM',
-        'done': true,
-      },
-      {
-        'title': 'Order confirmed',
-        'subtitle': 'We\'ve confirmed your order',
-        'date': 'January 19, 2026 — 10:00 AM',
-        'done': status != 'pending',
-      },
-      {
-        'title': 'Order processed',
-        'subtitle': 'Your order is being processed for delivery',
-        'date': 'January 19, 2026 — 11:00 AM',
-        'done': status != 'pending',
-      },
-      {
-        'title': 'Order Shipped',
-        'subtitle': 'Your order is on the way',
-        'date': 'Soon',
-        'done': status == 'active',
-      },
-      {
-        'title': 'Order Delivered',
-        'subtitle': 'Expected delivery: Coming soon',
-        'date': '',
-        'done': false,
-      },
-    ];
-
-    return items.map((item) {
-      final done = item['done'] as bool;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: done ? AppColors.primary : AppColors.grey300,
-                    border: Border.all(
-                      color: done ? AppColors.primary : AppColors.grey300,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['title'] as String,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: done
-                          ? (isDark ? AppColors.white : AppColors.text)
-                          : (isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.grey400),
-                    ),
-                  ),
-                  Text(
-                    item['subtitle'] as String,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: done
-                          ? (isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary)
-                          : (isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.grey300),
-                    ),
-                  ),
-                  if ((item['date'] as String).isNotEmpty)
-                    Text(
-                      item['date'] as String,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: done
-                            ? (isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.grey400)
-                            : (isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.grey300),
-                      ),
-                    ),
-                ],
+        if (order.statusHistory.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Detailed timeline unavailable for this order.',
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.grey400,
               ),
             ),
-          ],
-        ),
-      );
-    }).toList();
+          )
+        else
+          ...items.map((item) {
+            final done = item['done'] as bool;
+            final date = item['date'] as String;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 14,
+                    height: 14,
+                    margin: const EdgeInsets.only(top: 2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: done ? AppColors.primary : AppColors.grey300,
+                      border: Border.all(
+                        color: done ? AppColors.primary : AppColors.grey300,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['title'] as String,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: done
+                                ? (isDark ? AppColors.white : AppColors.text)
+                                : (isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.grey400),
+                          ),
+                        ),
+                        Text(
+                          item['subtitle'] as String,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: done
+                                ? (isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary)
+                                : (isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.grey300),
+                          ),
+                        ),
+                        if (date.isNotEmpty)
+                          Text(
+                            date,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.grey400,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+      ],
+    );
   }
 }
 

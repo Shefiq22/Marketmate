@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
+import 'package:market_mate/core/utils/order_status_utils.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/buyer_layout.dart';
 import '../../models/models.dart';
@@ -17,9 +18,11 @@ class OrdersScreen extends ConsumerStatefulWidget {
 
 class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
-  List<Order> _getOrders(String status) {
+  List<Order> _getOrders(String tabGroup) {
     final orders = ref.watch(ordersProvider).asData?.value ?? [];
-    return orders.where((o) => o.status == status).toList();
+    return orders
+        .where((o) => OrderStatusUtils.tabGroup(o.status) == tabGroup)
+        .toList();
   }
 
   @override
@@ -226,15 +229,16 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statusColor = order.status == 'active'
+    final group = OrderStatusUtils.tabGroup(order.status);
+    final statusColor = group == 'active'
         ? AppColors.primary
-        : order.status == 'pending'
+        : group == 'pending'
         ? AppColors.orange
         : AppColors.grey500;
     final l10n = AppLocalizations.of(context)!;
-    final statusLabel = order.status == 'active'
+    final statusLabel = group == 'active'
         ? l10n.orders_status_active
-        : order.status == 'pending'
+        : group == 'pending'
         ? l10n.orders_status_awaiting
         : l10n.orders_status_completed;
 

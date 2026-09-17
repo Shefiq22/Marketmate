@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:market_mate/core/theme/app_colors.dart';
 import 'package:market_mate/l10n/app_localizations.dart';
 import 'package:market_mate/dashboard/rider/models/rider_delivery_model.dart';
+import 'package:market_mate/dashboard/rider/providers/rider_dashboard_provider.dart';
 import 'package:market_mate/dashboard/rider/repositories/rider_repository.dart';
 
 class RiderDeliveryDetailPage extends ConsumerStatefulWidget {
@@ -45,6 +46,9 @@ class _RiderDeliveryDetailPageState extends ConsumerState<RiderDeliveryDetailPag
           await repo.markArrived(orderId);
           break;
       }
+      ref.invalidate(riderActiveProvider);
+      ref.invalidate(riderPendingProvider);
+      ref.invalidate(riderCompletedProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.snackbar_status_updated(status))),
@@ -71,20 +75,20 @@ class _RiderDeliveryDetailPageState extends ConsumerState<RiderDeliveryDetailPag
     final timeline = [
       _TimelineEntry(
         l10n.rider_accept_delivery,
-        'You accepted delivery from Mutiat Alasela',
-        'January 19, 2026 - 10:20 AM',
+        'You accepted delivery from ${d.customerName}',
+        d.currentStep.index >= 0 ? d.lastUpdate : '',
         d.currentStep.index >= 0,
       ),
       _TimelineEntry(
         l10n.rider_heading_to_pick,
         'You went to pick delivery at ${d.pickupAddress}',
-        'January 19, 2026 - 10:31 AM',
+        '',
         d.currentStep.index >= 1,
       ),
       _TimelineEntry(
         l10n.rider_picked_up,
         'You picked up delivery at ${d.pickupAddress}',
-        'January 21, 2026 - 11:24 AM',
+        '',
         d.currentStep.index >= 2,
       ),
       _TimelineEntry(
@@ -224,16 +228,25 @@ class _RiderDeliveryDetailPageState extends ConsumerState<RiderDeliveryDetailPag
                                     : AppColors.gray2,
                               ),
                             ),
-                            AnimatedRotation(
-                              turns: _statusExpanded ? 0.5 : 0,
-                              duration: const Duration(milliseconds: 200),
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: isDark
-                                    ? AppColors.textSecondaryDark
-                                    : AppColors.gray2,
+                            if (_isUpdating)
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            else
+                              AnimatedRotation(
+                                turns: _statusExpanded ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 200),
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.gray2,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),

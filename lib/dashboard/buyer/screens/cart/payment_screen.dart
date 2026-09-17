@@ -215,7 +215,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 32.0),
         child: GreenButton(
-          label: _paying ? 'Processing...' : 'Pay ${formatPrice(widget.total)}',
+          label: _paying ? 'Processing...' : 'Simulate Payment — ${formatPrice(widget.total)}',
           onTap: _paying ? null : _initiatePay,
         ),
       ),
@@ -241,19 +241,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     setState(() => _paying = true);
     try {
       final checkoutNotifier = ref.read(checkoutStateProvider.notifier);
-      if (widget.paymentMethod == 'paystack') {
-        await checkoutNotifier.initiateCardPayment();
-      } else {
-        await checkoutNotifier.assignVirtualAccount();
-      }
+      // ── SIMULATION MODE ────────────────────────────────────────────────
+      // Paystack payment initiation (card + virtual account) is disabled so
+      // an order completes without the Paystack gateway (approval pending).
+      // Uncomment when Paystack is live.
+      // if (widget.paymentMethod == 'paystack') {
+      //   await checkoutNotifier.initiateCardPayment();
+      // } else {
+      //   await checkoutNotifier.assignVirtualAccount();
+      // }
       if (!mounted) return;
       final state = ref.read(checkoutStateProvider);
       if (state.error != null) {
         throw Exception(state.error);
       }
-      if (state.paymentData == null) {
-        throw Exception('No payment data returned');
-      }
+      // if (state.paymentData == null) {
+      //   throw Exception('No payment data returned');
+      // }
       checkoutNotifier.markSuccess();
       if (!mounted) return;
       final cart = context.read<CartProvider>();

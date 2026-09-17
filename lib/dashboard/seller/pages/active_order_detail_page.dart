@@ -5,14 +5,6 @@ import 'package:market_mate/features/chat/presentation/pages/order_chat_page.dar
 import 'package:market_mate/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class _TimelineEntry {
-  final String title;
-  final String subtitle;
-  final String timestamp;
-
-  const _TimelineEntry(this.title, this.subtitle, this.timestamp);
-}
-
 class ActiveOrderDetailPage extends StatelessWidget {
   final OrderModel order;
 
@@ -27,7 +19,7 @@ class ActiveOrderDetailPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hPad = isTablet ? size.width * 0.08 : 20.0;
     final stepIndex = order.currentStatus.index;
-    final progress = (stepIndex + 1) / 4;
+    final progress = (stepIndex + 1) / OrderStatus.values.length;
 
     return Scaffold(
       backgroundColor: isDark
@@ -256,47 +248,31 @@ class ActiveOrderDetailPage extends StatelessWidget {
     bool isTablet,
     bool isDark,
   ) {
-    final steps = <_TimelineEntry>[
-      _TimelineEntry(
-        'Order placed',
-        'Your order has been received',
-        order.timeline.isNotEmpty
-            ? '${order.placedDate} - ${order.timeline[0].time}'
-            : '',
-      ),
-      _TimelineEntry(
-        'Order confirmed',
-        "We've confirmed your order",
-        order.timeline.length > 1
-            ? '${order.placedDate} - ${order.timeline[1].time}'
-            : '',
-      ),
-      _TimelineEntry(
-        'Order processed',
-        'Your order is being processed for delivery',
-        order.timeline.length > 2 && order.timeline[2].completed
-            ? 'January 21, 2026 - ${order.timeline[2].time}'
-            : '',
-      ),
-      _TimelineEntry(
-        'Order Shipped',
-        'Your order is on the way',
-        order.currentStatus.index >= OrderStatus.shipped.index
-            ? 'January 22, 2026 - 02:54 PM'
-            : '',
-      ),
-      _TimelineEntry(
-        'Order Delivered',
-        'Expected delivery',
-        order.estimatedDelivery ?? '',
-      ),
-    ];
+    if (order.timeline.isEmpty) {
+      return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'No timeline data for this order.',
+            style: TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
+              fontSize: isTablet ? 13 : 12,
+              color: AppColors.gray2,
+            ),
+          ),
+        ),
+      ];
+    }
 
-    return steps.asMap().entries.map((entry) {
+    return order.timeline.asMap().entries.map((entry) {
       final i = entry.key;
       final step = entry.value;
-      final done = i <= order.currentStatus.index;
-      final isLast = i == steps.length - 1;
+      final isLast = i == order.timeline.length - 1;
+      final timestamp = [
+        step.date,
+        step.time,
+      ].where((s) => s.isNotEmpty).join(' - ');
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(
@@ -309,17 +285,13 @@ class ActiveOrderDetailPage extends StatelessWidget {
                   height: isTablet ? 28 : 24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: done
+                    color: step.completed
                         ? AppColors.primary
-                        : (isDark ? AppColors.borderDark : AppColors.border),
-                    border: Border.all(
-                      color: done
-                          ? AppColors.primary
-                          : (isDark ? AppColors.borderDark : AppColors.border),
-                      width: 2,
-                    ),
+                        : (isDark
+                              ? AppColors.borderDark
+                              : AppColors.border),
                   ),
-                  child: done
+                  child: step.completed
                       ? Padding(
                           padding: const EdgeInsets.all(5),
                           child: SvgPicture.asset(
@@ -338,7 +310,7 @@ class ActiveOrderDetailPage extends StatelessWidget {
                   Container(
                     width: 2,
                     height: 36,
-                    color: done && i < order.currentStatus.index
+                    color: step.completed
                         ? AppColors.primary
                         : (isDark ? AppColors.borderDark : AppColors.border),
                   ),
@@ -350,33 +322,22 @@ class ActiveOrderDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    step.title,
+                    step.label,
                     style: TextStyle(
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: isTablet ? 15 : 14,
                       fontWeight: FontWeight.w600,
-                      color: done
+                      color: step.completed
                           ? (isDark
                                 ? AppColors.textPrimaryDark
                                 : AppColors.black)
                           : AppColors.gray2,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    step.subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: isTablet ? 13 : 12,
-                      color: isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  if (step.timestamp.isNotEmpty) ...[
+                  if (timestamp.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      step.timestamp,
+                      timestamp,
                       style: TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
                         fontSize: isTablet ? 12 : 11,

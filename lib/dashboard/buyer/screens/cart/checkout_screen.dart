@@ -8,10 +8,11 @@ import '../../models/models.dart';
 import '../../widgets/common_widgets.dart';
 import '../../providers/addresses_provider.dart';
 import '../../providers/checkout_provider.dart';
-import '../../providers/paystack_payment_provider.dart';
+// SIMULATION MODE: Paystack imports commented out until the gateway is live.
+// import '../../providers/paystack_payment_provider.dart';
 import '../../repositories/cart_repository.dart';
 import '../profile/edit_profile_screen.dart';
-import 'paystack_webview_screen.dart';
+// import 'paystack_webview_screen.dart';
 import 'payment_screen.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -21,7 +22,10 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 }
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
-  String _paymentMethod = 'paystack';
+  // SIMULATION MODE: default payment method switched from 'paystack' to
+  // 'bank' so checkout creates a real order without requiring Paystack.
+  // Restore to 'paystack' once the Paystack app is approved.
+  String _paymentMethod = 'bank';
   UserAddress? _selectedAddress;
   bool _initialized = false;
   bool _isProcessing = false;
@@ -540,52 +544,58 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     debugPrint('[CheckoutDebug] Coordinates — $coords');
     debugPrint('[CheckoutDebug] Payment method UI: "${_paymentMethod}" → mapped to: "${_paymentMethod == 'paystack' ? 'card' : 'bank_transfer'}"');
 
-    if (_paymentMethod == 'paystack') {
-      final paystackNotifier = ref.read(paystackPaymentProvider.notifier);
-      paystackNotifier.reset();
-      final cartRepo = CartRepository();
-      try {
-        await cartRepo.clearCart();
-        for (final item in checkoutItems) {
-          await cartRepo.addItem(item.product.id, quantity: item.quantity);
-        }
-      } catch (_) {}
-      await paystackNotifier.placeAndInitiateOrder(
-        items: checkoutItems.map((item) => {
-          'product': item.product.id,
-          'quantity': item.quantity,
-        }).toList(),
-        street: parsed.street,
-        city: parsed.city,
-        stateName: parsed.state,
-        coordinates: coords,
-        paymentMethod: 'card',
-      );
-      if (!mounted) return;
-      setState(() => _isProcessing = false);
-      final psState = ref.read(paystackPaymentProvider);
-      if (psState.step == PaystackStep.processingInWebView &&
-          psState.accessCode != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PaystackWebViewScreen(
-              checkoutUrl: 'https://checkout.paystack.com/${psState.accessCode}',
-              orderId: psState.orderId!,
-              total: total,
-            ),
-          ),
-        );
-      } else if (psState.step == PaystackStep.paymentFailed) {
-        if (_isStockError(psState.error)) {
-          _showStockErrorSheet();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(psState.error ?? 'Checkout failed')),
-          );
-        }
-      }
-    } else {
+    // ── SIMULATION MODE ────────────────────────────────────────────────────
+    // The Paystack checkout branch is disabled below so a real order can be
+    // created and tracked without the Paystack gateway (approval pending).
+    // Orders go through the bank-transfer path instead, and PaymentScreen
+    // simulates a successful payment. Uncomment everything in this block and
+    // restore `_paymentMethod = 'paystack'` when Paystack goes live.
+    // if (_paymentMethod == 'paystack') {
+    //   final paystackNotifier = ref.read(paystackPaymentProvider.notifier);
+    //   paystackNotifier.reset();
+    //   final cartRepo = CartRepository();
+    //   try {
+    //     await cartRepo.clearCart();
+    //     for (final item in checkoutItems) {
+    //       await cartRepo.addItem(item.product.id, quantity: item.quantity);
+    //     }
+    //   } catch (_) {}
+    //   await paystackNotifier.placeAndInitiateOrder(
+    //     items: checkoutItems.map((item) => {
+    //       'product': item.product.id,
+    //       'quantity': item.quantity,
+    //     }).toList(),
+    //     street: parsed.street,
+    //     city: parsed.city,
+    //     stateName: parsed.state,
+    //     coordinates: coords,
+    //     paymentMethod: 'card',
+    //   );
+    //   if (!mounted) return;
+    //   setState(() => _isProcessing = false);
+    //   final psState = ref.read(paystackPaymentProvider);
+    //   if (psState.step == PaystackStep.processingInWebView &&
+    //       psState.accessCode != null) {
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (_) => PaystackWebViewScreen(
+    //           checkoutUrl: 'https://checkout.paystack.com/${psState.accessCode}',
+    //           orderId: psState.orderId!,
+    //           total: total,
+    //         ),
+    //       ),
+    //     );
+    //   } else if (psState.step == PaystackStep.paymentFailed) {
+    //     if (_isStockError(psState.error)) {
+    //       _showStockErrorSheet();
+    //     } else {
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(content: Text(psState.error ?? 'Checkout failed')),
+    //       );
+    //     }
+    //   }
+    // } else {
       final notifier = ref.read(checkoutStateProvider.notifier);
       notifier.setProcessing();
       final cartRepo = CartRepository();
@@ -632,7 +642,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           );
         }
       }
-    }
+      // }  // ← closes the commented-out `if (_paymentMethod == 'paystack')` branch
   }
 }
 

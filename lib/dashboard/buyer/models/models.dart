@@ -87,13 +87,15 @@ class Product {
       return fallback;
     }
 
-    debugPrint(
-      '[ProductParse] id=${json['_id']}  '
-      'rawStock=${rawStock.runtimeType}=$rawStock  '
-      'parsedStock=$parsedStock  '
-      'rawAvailable=${json['isAvailable']}  '
-      'rawApproved=${json['isApproved']}',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '[ProductParse] id=${json['_id']}  '
+        'rawStock=${rawStock.runtimeType}=$rawStock  '
+        'parsedStock=$parsedStock  '
+        'rawAvailable=${json['isAvailable']}  '
+        'rawApproved=${json['isApproved']}',
+      );
+    }
 
     return Product(
       id: json['_id'] ?? json['id'] ?? '',
