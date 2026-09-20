@@ -489,6 +489,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         return AuthNeedsProfileUpdate();
       }
       final role = prefs.getString(_roleKey) ?? '';
+      unawaited(_syncFcmToken());
       return _roleToState(role);
     }
 
@@ -503,6 +504,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
           if (role.isNotEmpty) {
             await prefs.setString(_tokenKey, oldToken);
             await prefs.setString(_roleKey, role);
+            unawaited(_syncFcmToken());
             return _roleToState(role);
           }
         } catch (_) {}
@@ -599,7 +601,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         debugPrint('[Auth] No FCM token available to sync.');
         return;
       }
-      await syncFcmTokenToProfile(fcmToken);
+      await syncFcmTokenWithBackend(fcmToken);
       debugPrint('[Auth] FCM token synced after login.');
     } catch (e) {
       debugPrint('[Auth] FCM token sync failed: $e');

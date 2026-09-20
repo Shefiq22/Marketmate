@@ -1,8 +1,36 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:market_mate/core/network/api_client.dart';
 import 'package:market_mate/core/network/api_endpoints.dart';
+import 'package:market_mate/core/utils/prefs_cache.dart';
+
+const _deviceIdKey = 'fcm_device_id';
+
+/// Stable per-install identifier used when registering this device with the
+/// backend for push notifications. Generated once and persisted locally.
+String _getDeviceId() {
+  final cached = PrefsCache().getString(_deviceIdKey);
+  if (cached != null && cached.isNotEmpty) return cached;
+
+  final random = Random.secure();
+  final id = List.generate(
+    16,
+    (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
+  PrefsCache().setString(_deviceIdKey, id);
+  return id;
+}
+
+String _devicePlatform() {
+  if (!kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
+    if (defaultTargetPlatform == TargetPlatform.android) return 'android';
+  }
+  return 'web';
+}
 
 class FcmTokenNotifier extends Notifier<String?> {
   @override
@@ -32,7 +60,7 @@ final fcmInitializationProvider = FutureProvider<void>((ref) async {
 
     messaging.onTokenRefresh.listen((newToken) {
       ref.read(fcmTokenProvider.notifier).setToken(newToken);
-      syncFcmTokenToProfile(newToken);
+      syncFcmTokenWithBackend(newToken);
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -59,9 +87,11 @@ Future<String?> getCurrentFcmToken(Ref ref) async {
   return ref.read(fcmTokenProvider);
 }
 
-/// Sends the push token to the user's profile as `fcmToken` so the backend
-/// can deliver notifications to this device. Non-fatal on failure.
-Future<void> syncFcmTokenToProfile(String fcmToken) async {
+/// Saves the device's FCM push token so the backend (a) stores it on the
+/// user's profile via `PATCH /api/v1/users/me` and (b) registers this device
+/// via `POST /api/v1/devices/register`. Non-fatal on failure so push setup
+/// never breaks the surrounding flow.
+Future<void> syncFcmTokenWithBackend(String fcmToken) async {
   try {
     await ApiClient().patch(
       ApiEndpoints.myProfile,
@@ -70,6 +100,26 @@ Future<void> syncFcmTokenToProfile(String fcmToken) async {
     debugPrint('[FCM] Token synced to profile');
   } catch (e) {
     debugPrint('[FCM] Token sync to profile failed: $e');
+  }
+
+  await registerFcmDevice(fcmToken);
+}
+
+/// Registers this device with the backend (`POST /api/v1/devices/register`)
+/// so it can receive push notifications. Non-fatal on failure.
+Future<void> registerFcmDevice(String fcmToken) async {
+  try {
+    await ApiClient().post(
+      ApiEndpoints.devicesRegister,
+      body: {
+        'fcmToken': fcmToken,
+        'platform': _devicePlatform(),
+        'deviceId': _getDeviceId(),
+      },
+    );
+    debugPrint('[FCM] Device registered for notifications');
+  } catch (e) {
+    debugPrint('[FCM] Device registration failed: $e');
   }
 }
 
