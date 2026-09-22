@@ -594,15 +594,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   /// Sends the current device's FCM push token to the profile endpoint as
   /// `fcmToken`. Fails silently so push setup never breaks authentication.
+  /// Initializing FCM also registers the token with the backend
+  /// (`POST /api/v1/notifications/tokens`).
   Future<void> _syncFcmToken() async {
     try {
       final fcmToken = await getCurrentFcmToken(ref);
-      if (fcmToken == null || fcmToken.isEmpty) {
-        debugPrint('[Auth] No FCM token available to sync.');
-        return;
-      }
-      await syncFcmTokenWithBackend(fcmToken);
-      debugPrint('[Auth] FCM token synced after login.');
+      debugPrint('[Auth] FCM ready'
+          '${fcmToken == null || fcmToken.isEmpty ? ' (no token)' : ''}.');
     } catch (e) {
       debugPrint('[Auth] FCM token sync failed: $e');
     }
@@ -610,6 +608,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   Future<void> logout() async {
     try {
+      // Deregister this device's push token before the session is cleared so
+      // the backend stops sending notifications here. Fire-and-forget.
+      final fcmToken = ref.read(fcmTokenProvider);
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        unawaited(removeFcmToken(fcmToken));
+      }
+
       final prefs = ref.read(sharedPreferencesProvider);
       await Future.wait([
         prefs.remove(_tokenKey),

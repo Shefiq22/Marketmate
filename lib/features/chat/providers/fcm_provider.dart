@@ -1,36 +1,12 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:market_mate/core/network/api_client.dart';
 import 'package:market_mate/core/network/api_endpoints.dart';
-import 'package:market_mate/core/utils/prefs_cache.dart';
-
-const _deviceIdKey = 'fcm_device_id';
-
-/// Stable per-install identifier used when registering this device with the
-/// backend for push notifications. Generated once and persisted locally.
-String _getDeviceId() {
-  final cached = PrefsCache().getString(_deviceIdKey);
-  if (cached != null && cached.isNotEmpty) return cached;
-
-  final random = Random.secure();
-  final id = List.generate(
-    16,
-    (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-  ).join();
-  PrefsCache().setString(_deviceIdKey, id);
-  return id;
-}
-
-String _devicePlatform() {
-  if (!kIsWeb) {
-    if (defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
-    if (defaultTargetPlatform == TargetPlatform.android) return 'android';
-  }
-  return 'web';
-}
+import 'package:market_mate/core/notifications/deep_link_handler.dart';
+import 'package:market_mate/core/notifications/local_notifications.dart';
 
 class FcmTokenNotifier extends Notifier<String?> {
   @override
@@ -43,6 +19,14 @@ final fcmTokenProvider = NotifierProvider<FcmTokenNotifier, String?>(
   () => FcmTokenNotifier(),
 );
 
+/// Initializes Firebase Messaging and wires up all three notification states:
+///
+///  - Terminated:  `getInitialMessage()` routes the tap once the app is up.
+///  - Background:  `onMessageOpenedApp` routes the tap immediately.
+///  - Foreground:  `onMessage` shows a heads-up via [LocalNotifications].
+///
+/// Also registers the device token with the backend on launch/login so push
+/// delivery is always configured. Reading this provider waits for completion.
 final fcmInitializationProvider = FutureProvider<void>((ref) async {
   try {
     final messaging = FirebaseMessaging.instance;
@@ -53,27 +37,43 @@ final fcmInitializationProvider = FutureProvider<void>((ref) async {
       sound: true,
     );
 
+    await LocalNotifications.instance.init();
+    await LocalNotifications.instance.requestDarwinPermissions();
+
     final token = await messaging.getToken();
-    if (token != null) {
+    if (token != null && token.isNotEmpty) {
       ref.read(fcmTokenProvider.notifier).setToken(token);
+      unawaited(registerFcmToken(token));
     }
 
     messaging.onTokenRefresh.listen((newToken) {
       ref.read(fcmTokenProvider.notifier).setToken(newToken);
-      syncFcmTokenWithBackend(newToken);
+      unawaited(registerFcmToken(newToken));
     });
 
+    // Foreground: present the message as a heads-up alert.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _handleForegroundMessage(message);
+      final data = message.data;
+      LocalNotifications.instance.show(
+        id: _notificationIdFor(data),
+        title:
+            message.notification?.title ??
+            data['title'] ??
+            'MarketMate',
+        body: message.notification?.body ?? data['body'] ?? '',
+        imageUrl: data['image_url'],
+      );
     });
 
+    // Background (minimized): tap routes the user into the target screen.
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleNotificationTap(message);
+      handleNotificationDeepLink(message.data, ref: ref);
     });
 
+    // Terminated (app closed): route the initial notification if one exists.
     final initialMessage = await messaging.getInitialMessage();
     if (initialMessage != null) {
-      _handleNotificationTap(initialMessage);
+      handleNotificationDeepLink(initialMessage.data, ref: ref);
     }
   } catch (e) {
     debugPrint('[FCM] Initialization error: $e');
@@ -81,55 +81,43 @@ final fcmInitializationProvider = FutureProvider<void>((ref) async {
 });
 
 /// Resolves the device's FCM push token, initializing Firebase Messaging
-/// first if needed. Returns `null` when the token is unavailable.
+/// first if needed. Returns `null` when the token is unavailable. Reading
+/// this also triggers token registration on every app launch/login.
 Future<String?> getCurrentFcmToken(Ref ref) async {
   await ref.read(fcmInitializationProvider.future);
   return ref.read(fcmTokenProvider);
 }
 
-/// Saves the device's FCM push token so the backend (a) stores it on the
-/// user's profile via `PATCH /api/v1/users/me` and (b) registers this device
-/// via `POST /api/v1/devices/register`. Non-fatal on failure so push setup
+/// Registers this device's FCM token with the backend
+/// (`POST /api/v1/notifications/tokens`). Non-fatal on failure so push setup
 /// never breaks the surrounding flow.
-Future<void> syncFcmTokenWithBackend(String fcmToken) async {
+Future<void> registerFcmToken(String fcmToken) async {
   try {
-    await ApiClient().patch(
-      ApiEndpoints.myProfile,
-      body: {'fcmToken': fcmToken},
+    final res = await ApiClient().post(
+      ApiEndpoints.notificationTokens,
+      body: {'token': fcmToken},
     );
-    debugPrint('[FCM] Token synced to profile');
+    debugPrint('[FCM] Token registered (${res.success})');
   } catch (e) {
-    debugPrint('[FCM] Token sync to profile failed: $e');
-  }
-
-  await registerFcmDevice(fcmToken);
-}
-
-/// Registers this device with the backend (`POST /api/v1/devices/register`)
-/// so it can receive push notifications. Non-fatal on failure.
-Future<void> registerFcmDevice(String fcmToken) async {
-  try {
-    await ApiClient().post(
-      ApiEndpoints.devicesRegister,
-      body: {
-        'fcmToken': fcmToken,
-        'platform': _devicePlatform(),
-        'deviceId': _getDeviceId(),
-      },
-    );
-    debugPrint('[FCM] Device registered for notifications');
-  } catch (e) {
-    debugPrint('[FCM] Device registration failed: $e');
+    debugPrint('[FCM] Token registration failed: $e');
   }
 }
 
-void _handleForegroundMessage(RemoteMessage message) {
-  final data = message.data;
-  debugPrint('[FCM] Foreground message: $data');
+/// Removes this device's FCM token on logout
+/// (`DELETE /api/v1/notifications/tokens`). Non-fatal on failure.
+Future<void> removeFcmToken(String fcmToken) async {
+  try {
+    final res = await ApiClient().delete(
+      ApiEndpoints.notificationTokens,
+      body: {'token': fcmToken},
+    );
+    debugPrint('[FCM] Token removed (${res.success})');
+  } catch (e) {
+    debugPrint('[FCM] Token removal failed: $e');
+  }
 }
 
-void _handleNotificationTap(RemoteMessage message) {
-  final data = message.data;
-  final orderId = data['orderId'] ?? data['order_id'];
-  debugPrint('[FCM] Notification tap for order: $orderId');
+int _notificationIdFor(Map<String, dynamic> data) {
+  final id = data['orderId'] ?? data['order_id'] ?? data['notificationId'];
+  return (id is String && id.isNotEmpty) ? id.hashCode : DateTime.now().millisecondsSinceEpoch;
 }

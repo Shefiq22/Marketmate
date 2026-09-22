@@ -65,9 +65,11 @@ class ApiEndpoints {
   static const String notifications = '$_v1/notifications';
   static String notificationRead(String id) => '$_v1/notifications/$id/read';
   static const String notificationsReadAll = '$_v1/notifications/read-all';
+  static const String notificationsUnreadCount = '$_v1/notifications/unread-count';
+  static String deleteNotification(String id) => '$_v1/notifications/$id';
 
-  // Devices
-  static const String devicesRegister = '$_v1/devices/register';
+  // Notifications — tokens
+  static const String notificationTokens = '$_v1/notifications/tokens';
 
   // Uploads
   static const String uploadSignature = '$_v1/uploads/signature';
@@ -88,9 +90,6 @@ class ApiEndpoints {
   // Analytics — Customer
   static const String analyticsDiscovery = '$_v1/analytics/discovery';
   static const String analyticsTopProducts = '$_v1/analytics/top-products';
-
-  // Notifications — tokens
-  static const String notificationTokens = '$_v1/notifications/tokens';
 
   // Health
   static const String health = '/health';

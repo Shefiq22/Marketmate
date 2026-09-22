@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/api_client.dart';
+import 'core/navigation/global_navigator.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/theme_provider.dart';
@@ -96,6 +97,7 @@ class MarketMateApp extends ConsumerWidget {
         themeMode: themeMode,
         builder: (context, child) => HeroMode(enabled: false, child: child!),
         home: const AuthGate(),
+        navigatorKey: appNavigatorKey,
       ),
     );
   }

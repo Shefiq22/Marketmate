@@ -58,6 +58,12 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
 
+    <!-- Required for silent remote notifications that refresh app state -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
+
     <!-- Allows file_picker to open files from Files app and third-party providers -->
     <key>LSSupportsOpeningDocumentsInPlace</key>
     <true/>

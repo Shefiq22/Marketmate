@@ -393,6 +393,7 @@ class AppNotification {
   final String time;
   final bool isRead;
   final String type;
+  final String? imageUrl;
 
   const AppNotification({
     required this.id,
@@ -401,6 +402,7 @@ class AppNotification {
     required this.time,
     this.isRead = false,
     this.type = 'info',
+    this.imageUrl,
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
@@ -411,6 +413,7 @@ class AppNotification {
       time: json['time'] ?? json['createdAt'] ?? '',
       isRead: json['isRead'] ?? json['read'] ?? false,
       type: json['type'] ?? 'info',
+      imageUrl: json['imageUrl'] ?? json['image'] ?? json['image_url'],
     );
   }
 }

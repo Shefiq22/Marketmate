@@ -218,7 +218,7 @@ class ApiClient {
         case 'PATCH':
           return http.patch(uri, headers: headers, body: body);
         case 'DELETE':
-          return http.delete(uri, headers: headers);
+          return http.delete(uri, headers: headers, body: body);
         default:
           return http.post(uri, headers: headers, body: body);
       }
@@ -288,12 +288,17 @@ class ApiClient {
     );
   }
 
-  Future<ApiResponse> delete(String path) async {
+  Future<ApiResponse> delete(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
     final uri = Uri.parse('${AppConfig.baseUrl}$path');
+    final bodyStr = body != null ? jsonEncode(body) : null;
     return _executeWithRetry(
       uri: uri,
       method: 'DELETE',
       path: path,
+      body: bodyStr,
       headers: await _headers,
     );
   }

@@ -21,4 +21,20 @@ class NotificationsRepository {
   Future<void> markAllRead() async {
     await _client.patch(ApiEndpoints.notificationsReadAll);
   }
+
+  Future<void> delete(String id) async {
+    await _client.delete(ApiEndpoints.deleteNotification(id));
+  }
+
+  Future<int> unreadCount() async {
+    final res = await _client.get(ApiEndpoints.notificationsUnreadCount);
+    if (!res.success) return 0;
+    final data = res.data;
+    if (data is num) return data.toInt();
+    if (data is Map<String, dynamic>) {
+      final n = data['count'] ?? data['unreadCount'];
+      if (n is num) return n.toInt();
+    }
+    return 0;
+  }
 }
